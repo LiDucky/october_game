@@ -17,7 +17,9 @@ screen = pygame.display.set_mode(( WINDOW_WIDTH, WINDOW_HEIGHT ))
 
 #initialize "Player" Class
 player = Player()
-enemy = Enemy()
+enemies = []
+for i in range(0, 3):
+    enemies.append(Enemy())
 gravity = 1
 max_velocity = 13
 
@@ -51,15 +53,18 @@ while True: # game loop
     #Character Controls
     player.control(gravity, max_velocity)
     player.move(solid_tiles)
-    
-    enemy.move(solid_tiles)
+    for enemy in enemies:
+        enemy.do_movement(gravity, max_velocity)
+        enemy.move(solid_tiles)
 
     if player.check_win(end_tiles):
         text = pygame.font.Font(None, 20)
         text_surface = text.render("You win!", True, [255,255,255], [0,0,0])
         screen.blit(text_surface, (50, 50))
     screen.blit(player.image, (player.x - camera_offset[0], player.y - camera_offset[1]))
-    screen.blit(enemy.image, (enemy.x - camera_offset[0], enemy.y - camera_offset[1]))
+    for enemy in enemies:
+        screen.blit(enemy.image, (enemy.x - camera_offset[0], enemy.y - camera_offset[1]))
+    player.draw_health(screen, camera_offset)
     
     if player.y > WINDOW_HEIGHT:
         # add text for player death

@@ -14,6 +14,7 @@ class Player():
         self.velocity_x = 0
         self.velocity_y = 0
         self.health = 6
+        self.max_health = 20
         # self.max_jumps = 1
 
     def respawn(self):
@@ -30,12 +31,10 @@ class Player():
                 hit_list.append(tile)
         return hit_list
 
-    def draw_health(self):
-
-        pygame.draw.rect(screen, RED, (200, 250, 6, 5))
+    def draw_health(self, screen, camera_offset):
+        pygame.draw.rect(screen, RED, (50, 50, self.max_health, 10))
         if self.health > 0:
-            pygame.draw.rect(screen, GREEN, (200, 250, self.health, 5))
-        pass
+            pygame.draw.rect(screen, GREEN, (50, 50, self.health, 10))
 
 
     def move(self, tiles):
