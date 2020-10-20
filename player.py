@@ -1,15 +1,19 @@
 import pygame
+#colors:
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
 
 class Player():
     def __init__(self):
-
         self.image = pygame.image.load('Assets/Sprites/player.png')
         self.image.convert()
+        self.max_airtime = 6
+        self.airtime = 0
         self.x = 300
         self.y = 300
         self.velocity_x = 0
         self.velocity_y = 0
-        self.grounded = False
+        self.health = 6
         # self.max_jumps = 1
 
     def respawn(self):
@@ -26,6 +30,14 @@ class Player():
                 hit_list.append(tile)
         return hit_list
 
+    def draw_health(self):
+
+        pygame.draw.rect(screen, RED, (200, 250, 6, 5))
+        if self.health > 0:
+            pygame.draw.rect(screen, GREEN, (200, 250, self.health, 5))
+        pass
+
+
     def move(self, tiles):
         self.x += self.velocity_x
         hit_list = self.collision_test(tiles)
@@ -40,11 +52,10 @@ class Player():
             if self.velocity_y > 0:
                 self.y = tile.top - int(self.image.get_height()) # collide on bottom side
                 self.velocity_y = 0
-                self.grounded = True
+                self.airtime = 0
             elif self.velocity_y < 0:
                 self.y = tile.bottom # collide on top side
                 self.velocity_y = 0
-        print(tiles)
         return self.image.get_rect
     
     def check_win(self, tiles):
@@ -60,11 +71,11 @@ class Player():
             self.velocity_x = -5
         if keys[pygame.K_RIGHT]:
             self.velocity_x = 5
-        if self.grounded:
+        if self.airtime < self.max_airtime:
+            self.airtime += 1
             if keys[pygame.K_UP]:
+                self.airtime = self.max_airtime
                 self.velocity_y = -25
-                self.grounded = False
-        else:
-            self.velocity_y += gravity
-            if self.velocity_y > max_velocity:
-                self.velocity_y = max_velocity
+        self.velocity_y += gravity
+        if self.velocity_y > max_velocity:
+            self.velocity_y = max_velocity
