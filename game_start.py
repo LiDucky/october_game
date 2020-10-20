@@ -17,9 +17,11 @@ screen = pygame.display.set_mode(( WINDOW_WIDTH, WINDOW_HEIGHT ))
 player = Player()
 gravity = 2
 max_velocity = 15
-solid_tiles = []
 
 while True: # game loop
+    solid_tiles = []
+    end_tiles = []
+    
     for event in pygame.event.get():
         if event.type == QUIT: # user closes the window
             pygame.quit()
@@ -49,12 +51,17 @@ while True: # game loop
                 screen.blit(maps.tile_one, (x * maps.tile_size, y * maps.tile_size))
             if tile == 2:
                 screen.blit(maps.tile_two, (x * maps.tile_size, y * maps.tile_size))
-            if tile != 0:
+                end_tiles.append(pygame.Rect(x * maps.tile_size, y * maps.tile_size, maps.tile_size, maps.tile_size))
+            if tile != 0 and tile != 2:
                 solid_tiles.append(pygame.Rect(x * maps.tile_size, y * maps.tile_size, maps.tile_size, maps.tile_size))
             x += 1
         y += 1
     
     player.move(solid_tiles)
+    if player.check_win(end_tiles):
+        text = pygame.font.Font(None, 20)
+        text_surface = text.render("You win!", True, [255,255,255], [0,0,0])
+        screen.blit(text_surface, (50, 50))
     screen.blit(player.image, (player.x, player.y))
     
     if player.y > WINDOW_HEIGHT:
