@@ -58,8 +58,7 @@ while True: # game loop
         text = pygame.font.Font(None, 20)
         text_surface = text.render("You died. :( press r to try again.", True, [255,255,255], [0,0,0])
         screen.blit(text_surface, (50, 50))
-        if keys[pygame.K_r]: # Player model reset
-            player.respawn()
+        player.respawn()
 
     pygame.display.update()
     clock.tick(60) # run at 60fps

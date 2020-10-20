@@ -13,8 +13,10 @@ class Player():
         # self.max_jumps = 1
 
     def respawn(self):
-        self.x = 300
-        self.y = 300
+        keys=pygame.key.get_pressed()
+        if keys[pygame.K_r]: # Player model reset
+            self.x = 300
+            self.y = 300
 
     def collision_test(self, tiles):
         hit_list = []
@@ -52,8 +54,8 @@ class Player():
                 return True
 
     def control(self, gravity, max_velocity):
-        self.velocity_x = 0
         keys=pygame.key.get_pressed()
+        self.velocity_x = 0
         if keys[pygame.K_LEFT]:
             self.velocity_x = -5
         if keys[pygame.K_RIGHT]:
