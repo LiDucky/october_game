@@ -50,3 +50,19 @@ class Player():
         for tile in tiles:
             if player_rect.colliderect(tile):
                 return True
+
+    def control(self, gravity, max_velocity):
+        self.velocity_x = 0
+        keys=pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            self.velocity_x = -5
+        if keys[pygame.K_RIGHT]:
+            self.velocity_x = 5
+        if self.grounded:
+            if keys[pygame.K_UP]:
+                self.velocity_y = -25
+                self.grounded = False
+        else:
+            self.velocity_y += gravity
+            if self.velocity_y > max_velocity:
+                self.velocity_y = max_velocity

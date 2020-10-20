@@ -27,20 +27,9 @@ while True: # game loop
             pygame.quit()
             sys.exit()
 
-    player.velocity_x = 0
-    keys=pygame.key.get_pressed()
-    if keys[pygame.K_LEFT]:
-        player.velocity_x = -5
-    if keys[pygame.K_RIGHT]:
-        player.velocity_x = 5
-    if player.grounded:
-        if keys[pygame.K_UP]:
-            player.velocity_y = -25
-            player.grounded = False
-    else:
-        player.velocity_y += gravity
-        if player.velocity_y > max_velocity:
-            player.velocity_y = max_velocity
+    #Character Controls
+    player.control(gravity, max_velocity)
+
 
     screen.fill((0,0,0))
     y = 0
