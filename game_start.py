@@ -51,8 +51,17 @@ while True: # game loop
     #Character Controls
     player.control(gravity, max_velocity)
     player.move(solid_tiles)
-    
     enemy.move(solid_tiles)
+
+    player_hitbox = pygame.Rect(player.x, player.y, 50, 60)
+    enemy_hitbox = pygame.Rect(enemy.x, player.y, 50, 60)
+
+    if player_hitbox.colliderect(enemy_hitbox):
+        # add text for player death
+        text = pygame.font.Font(None, 20)
+        text_surface = text.render("You died. :( press r to try again.", True, [255,255,255], [0,0,0])
+        screen.blit(text_surface, (50, 50))
+        player.respawn()
 
     if player.check_win(end_tiles):
         text = pygame.font.Font(None, 20)
