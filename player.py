@@ -5,7 +5,7 @@ GREEN = (0, 255, 0)
 
 class Player():
     def __init__(self):
-        self.image = pygame.image.load('Assets/Sprites/player.png')
+        self.image = pygame.image.load('Assets/Sprites/player/idle.png')
         self.image.convert()
         self.max_airtime = 6
         self.airtime = 0

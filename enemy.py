@@ -6,7 +6,7 @@ GREEN = (0, 255, 0)
 
 class Enemy():
     def __init__(self):
-        self.image = pygame.image.load('Assets/Sprites/player.png') # TODO: change to enemy image
+        self.image = pygame.image.load('Assets/Sprites/player/idle.png') # TODO: change to enemy image
         self.image.convert()
         self.x = random.randrange(1920 - self.image.get_width()) #pass in window width
         self.y = 300 #random.randrange(-100, -40)

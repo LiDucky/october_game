@@ -38,7 +38,7 @@ while True: # game loop
 
     screen.fill((0,0,0))
     y = 0
-    for row in maps.map_two:
+    for row in maps.map_five:
         x = 0
         for tile in row:
             if tile == 1:

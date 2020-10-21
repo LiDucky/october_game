@@ -12,7 +12,5 @@ class Item():
     
     def player_contact(self, player):   
         if self.hitbox.colliderect(player):
-            self.active = False
-        
-            
+            self.active = False # change later so it's whatever the item does on pickup
         
