@@ -1,6 +1,7 @@
 import pygame, sys
 from player import Player
 from enemy import Enemy
+from items import Item
 import maps
 
 clock = pygame.time.Clock()
