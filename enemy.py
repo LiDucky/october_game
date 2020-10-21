@@ -9,7 +9,9 @@ class Enemy():
         self.image = pygame.image.load('Assets/Sprites/player.png') # TODO: change to enemy image
         self.image.convert()
         self.x = random.randrange(1920 - self.image.get_width()) #pass in window width
-        self.y = random.randrange(-100, -40)
+        self.y = 300 #random.randrange(-100, -40)
+        self.hitbox = pygame.Rect(self.x, self.y, 50, 60)
+        self.damage = 1
         self.velocity_x = 0 # in the future add ai so it'll jump
         self.velocity_y = 0 # in the future add ai so it'll jump
         self.health = 6 # change later and add function to modify
@@ -47,6 +49,7 @@ class Enemy():
             elif self.velocity_y < 0:
                 self.y = tile.bottom # collide on top side
                 self.velocity_y = 0
+        self.hitbox = pygame.Rect(self.x, self.y, 50, 60)
         return self.image.get_rect
 
     def do_movement(self, gravity, max_velocity):

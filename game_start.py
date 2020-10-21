@@ -56,17 +56,13 @@ while True: # game loop
     for enemy in enemies:
         enemy.do_movement(gravity, max_velocity)
         enemy.move(solid_tiles)
+        if player.hitbox.colliderect(enemy.hitbox):
+            player.hurt(enemy.damage, screen)
 
-    player_hitbox = pygame.Rect(player.x, player.y, 50, 60)
-    enemy_hitbox = pygame.Rect(enemy.x, player.y, 50, 60)
-
-    if player_hitbox.colliderect(enemy_hitbox):
-        # add text for player death
+    if not player.alive:
         text = pygame.font.Font(None, 20)
         text_surface = text.render("You died. :( press r to try again.", True, [255,255,255], [0,0,0])
         screen.blit(text_surface, (50, 50))
-        player.respawn()
-
     if player.check_win(end_tiles):
         text = pygame.font.Font(None, 20)
         text_surface = text.render("You win!", True, [255,255,255], [0,0,0])
@@ -74,14 +70,11 @@ while True: # game loop
     screen.blit(player.image, (player.x - camera_offset[0], player.y - camera_offset[1]))
     for enemy in enemies:
         screen.blit(enemy.image, (enemy.x - camera_offset[0], enemy.y - camera_offset[1]))
-    player.draw_health(screen, camera_offset)
+    player.draw_health(camera_offset, screen)
     
-    if player.y > WINDOW_HEIGHT:
-        # add text for player death
-        text = pygame.font.Font(None, 20)
-        text_surface = text.render("You died. :( press r to try again.", True, [255,255,255], [0,0,0])
-        screen.blit(text_surface, (50, 50))
-        player.respawn()
+    # kill the player if they fall too far:
+    # if player.y > WINDOW_HEIGHT:
+    #     player.kill(screen)
 
     pygame.display.update()
     clock.tick(60) # run at 60fps
