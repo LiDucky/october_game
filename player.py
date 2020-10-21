@@ -28,6 +28,8 @@ class Player():
         self.animation_database["walk"] = self.load_animation("Assets/Sprites/player/walk", [7,7])
         self.animation_database["jump"] = self.load_animation("Assets/Sprites/player/jump", [1])
         self.animation_database["idle"] = self.load_animation("Assets/Sprites/player/idle", [1])
+        # self.max_jumps = 1
+        self.coins_collected = 0 # For Items
 
     def hurt(self, damage, screen):
         if self.last_hit > 60:
