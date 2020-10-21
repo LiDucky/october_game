@@ -61,6 +61,9 @@ class Player():
                 self.velocity_y = 0
         self.hitbox = pygame.Rect(self.x, self.y, 50, 60)
         return self.image.get_rect
+
+    def animate(self):
+        pass
     
     def check_win(self, tiles):
         player_rect = self.image.get_rect(left=self.x, top=self.y)
