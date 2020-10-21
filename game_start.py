@@ -21,7 +21,8 @@ enemies = []
 for i in range(0, 3):
     enemies.append(Enemy())
 gravity = 1
-max_velocity = 13
+max_velocity_x = 10
+max_velocity_y = 15
 
 camera_offset = [0, 0]
 
@@ -51,10 +52,11 @@ while True: # game loop
             x += 1
         y += 1
     #Character Controls
-    player.control(gravity, max_velocity)
+    player.last_hit += 1
+    player.control(gravity, max_velocity_x, max_velocity_y)
     player.move(solid_tiles)
     for enemy in enemies:
-        enemy.do_movement(gravity, max_velocity)
+        enemy.do_movement(gravity, max_velocity_y)
         enemy.move(solid_tiles)
         if player.hitbox.colliderect(enemy.hitbox):
             player.hurt(enemy.damage, screen)
@@ -67,7 +69,7 @@ while True: # game loop
         text = pygame.font.Font(None, 20)
         text_surface = text.render("You win!", True, [255,255,255], [0,0,0])
         screen.blit(text_surface, (50, 50))
-    screen.blit(player.image, (player.x - camera_offset[0], player.y - camera_offset[1]))
+    screen.blit(pygame.transform.flip(player.image, player.flip, False), (player.x - camera_offset[0], player.y - camera_offset[1]))
     for enemy in enemies:
         screen.blit(enemy.image, (enemy.x - camera_offset[0], enemy.y - camera_offset[1]))
     player.draw_health(camera_offset, screen)
