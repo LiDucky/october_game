@@ -18,6 +18,7 @@ class Player():
         self.health = 6
         self.max_health = 20
         # self.max_jumps = 1
+        self.coins_collected = 0 # For Items
 
     def hurt(self, damage, screen):
         self.health -= damage
