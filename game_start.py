@@ -1,52 +1,57 @@
-import pygame, sys
+import pygame, sys, maps, random
 from player import Player
 from enemy import Enemy
 from items import Item
 from particle import Particle
-import maps
-import random
-
-clock = pygame.time.Clock()
-
 from pygame.locals import *
 pygame.init()
 pygame.mixer.init()
 pygame.display.set_caption('October Game') # change for actual title later
+clock = pygame.time.Clock()
 
 # Window Size set
 WINDOW_HEIGHT = 1080
 WINDOW_WIDTH = 1920
 screen = pygame.display.set_mode(( WINDOW_WIDTH, WINDOW_HEIGHT))
 
-#initialize "Player" Class
+# Initialize "Player" Class
 player = Player()
-enemies = []
-items = []
-for i in range(0, 3):
-    enemies.append(Enemy())
+
+# World Settings
+camera_offset = [0, 0]
 gravity = 1
 max_velocity_x = 10
 max_velocity_y = 15
-
-# score
+particles = []
+attack_interval = 0
+isRight = True # TEMP Checks player Facing; can be later added to player class
 score = 0
 font = pygame.font.Font('freesansbold.ttf', 25)
 
-particles = []
-
+# Show Score
 def show_score(x, y):
     score = player.kills * 100 + player.coins_collected * 10
     screen.blit(font.render("Score: " + str(score), True, (255,255,255)), (x, y))
 
+# Enemy Spawn
+def spawn_enemy():
+    enemies = []
+    for i in range(0, 3):
+        enemies.append(Enemy())
+    return enemies
+enemies = spawn_enemy()
+
+# Item Spawn
+def spawn_item():
+    items = [Item(1280,750, "coin"),Item(1085, 270, "health"),Item(1580, 1050, "health"),Item(2175, 1230, "coin"),Item(380, 270, "coin")]
+    return items
+items = spawn_item()
+
+# FPS counter
 def show_fps():
     screen.blit(font.render(str(int(clock.get_fps())), True, (255,255,255)), (WINDOW_WIDTH - 100, 100))
 
-# Attack Test
-attack_interval = 0
-isRight = True # TEMP Checks player Facing; can be later added to player class
-
-camera_offset = [0, 0]
-
+# Main Menu
 click = False
 def main_menu():
     def create_font(t, s=72, c=(255, 255, 255), b=False, i=False):
@@ -64,7 +69,8 @@ def main_menu():
         start_game = create_font('START GAME')
         button_1 = screen.blit(start_game, (560, 350))
 
-while True: # game loop
+while True: # Main Game Loop
+    # Camera Controls
     camera_offset[0] += int(player.x-camera_offset[0]-WINDOW_WIDTH/2 + player.image.get_width()/2)
     camera_offset[1] += int(player.y-camera_offset[1]-WINDOW_HEIGHT/2 + player.image.get_height()/2)
     if camera_offset[0] < 0:
@@ -75,16 +81,14 @@ while True: # game loop
         camera_offset[0] = len(maps.map_five[0]) * maps.tile_size - WINDOW_WIDTH
     if camera_offset[1] > len(maps.map_five) * maps.tile_size - WINDOW_HEIGHT:
         camera_offset[1] = len(maps.map_five) * maps.tile_size - WINDOW_HEIGHT
-    solid_tiles = []
-    end_tiles = []
-
+    
+    # Particles
     if pygame.mouse.get_pressed()[0]:
         particles.append(Particle(pygame.mouse.get_pos()[0] - camera_offset[0], pygame.mouse.get_pos()[1] - camera_offset[1]))
 
-    for event in pygame.event.get():
-        if event.type == QUIT: # user closes the window
-            pygame.quit()
-            sys.exit()
+    # Generate Tiles
+    solid_tiles = []
+    end_tiles = []
 
     screen.fill((0,0,0))
     y = 0
@@ -102,12 +106,13 @@ while True: # game loop
                 solid_tiles.append(pygame.Rect(x * maps.tile_size, y * maps.tile_size, maps.tile_size, maps.tile_size))
             x += 1
         y += 1
-    #Character Controls
+
+    # Character Controls
     player.last_hit += 1
     player.control(gravity, max_velocity_x, max_velocity_y)
     player.move(solid_tiles)
 
-    # Attack Test
+    # Attack Logic
     attack = [] # Attack List
     if attack_interval > 0: # Attack interval timer
         attack_interval -= 1
@@ -128,6 +133,7 @@ while True: # game loop
                 attack.append(attack1)
             attack_interval = 15 # Sets max attack delay
 
+    # Enemy Controls
     for enemy in enemies:
         enemy.do_movement(player, gravity, max_velocity_y)
         enemy.move(solid_tiles)
@@ -135,11 +141,13 @@ while True: # game loop
             player.hurt(enemy, screen)
         if len(attack) > 0: # Attack Check
             if enemy.hitbox.colliderect(attack[0]):
-                enemy.hurt(player, enemies)
-                # enemies.pop(enemies.index(enemy)) # Delete hit enemy
+                enemy.damage_check(player, items, enemies)
 
-    show_score(500, 100)
-    show_fps()
+    # Item Controls
+    for item in items:
+        item.functions(screen, camera_offset, player)
+
+    # Win / Lose Conditions
     if not player.alive:
         text = pygame.font.Font(None, 20)
         text_surface = text.render("You died. :( press r to try again.", True, [255,255,255], [0,0,0])
@@ -153,13 +161,7 @@ while True: # game loop
         screen.blit(pygame.transform.flip(enemy.image, enemy.flip, False), (enemy.x - camera_offset[0], enemy.y - camera_offset[1]))
     player.draw_health(camera_offset, screen)
     
-    # kill the player if they fall too far:
-    # if player.y > WINDOW_HEIGHT:
-    #     player.kill(screen)
-    
-    for item in items:
-        item.functions(screen, camera_offset, player)
-    
+    # Particle Controls
     for i in range(len(particles)-1, -1, -1):
         particles[i].x += particles[i].velocity_x
         particles[i].y += particles[i].velocity_y
@@ -167,6 +169,14 @@ while True: # game loop
         particles[i].radius -= .1
         if particles[i].radius <= 0:
             particles.pop(i)
-    
+
+    # Exit the Game
+    for event in pygame.event.get():
+        if event.type == QUIT: 
+            pygame.quit()
+            sys.exit()
+
+    show_score(500, 100)
+    show_fps()
     pygame.display.update()
     clock.tick(60) # run at 60fps

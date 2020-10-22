@@ -31,9 +31,9 @@ class Player():
         self.animation_database["idle"] = self.load_animation("Assets/Sprites/player/idle", [1])
         # self.max_jumps = 1
         self.kills = 0
-        self.coins_collected = 0 # For Items
+        self.coins_collected = 0
 
-    def hurt(self, enemy, screen):
+    def hurt(self, enemy, screen): # Damages Player
         if self.last_hit > 30:
             if (self.x + self.image.get_width()/2) < (enemy.x + enemy.image.get_width()/2):
                 self.velocity_x = -20
@@ -42,12 +42,12 @@ class Player():
             self.health -= enemy.damage
             self.last_hit = 0
             if self.health <= 0:
-                self.kill(screen)
+                self.kill()
     
-    def kill(self, screen):
+    def kill(self):
         self.alive = False
 
-    def collision_test(self, tiles):
+    def collision_test(self, tiles): # World Collision
         hit_list = []
         player_rect = self.image.get_rect(left=self.x, top=self.y)
         for tile in tiles:
@@ -55,12 +55,12 @@ class Player():
                 hit_list.append(tile)
         return hit_list
 
-    def draw_health(self, camera_offset, screen):
+    def draw_health(self, camera_offset, screen): # Draws Health Bar
         pygame.draw.rect(screen, RED, (50, 50, self.max_health, 10))
         if self.health > 0:
             pygame.draw.rect(screen, GREEN, (50, 50, self.health, 10))
 
-    def move(self, tiles):
+    def move(self, tiles): # World Collision
         self.x += self.velocity_x
         hit_list = self.collision_test(tiles)
         for tile in hit_list:
@@ -81,13 +81,13 @@ class Player():
         self.hitbox = pygame.Rect(self.x, self.y, 50, 60)
         return self.image.get_rect
 
-    def check_win(self, tiles):
+    def check_win(self, tiles): # Checks if Player is at Exit
         player_rect = self.image.get_rect(left=self.x, top=self.y)
         for tile in tiles:
             if player_rect.colliderect(tile):
                 return True
 
-    def control(self, gravity, max_velocity_x, max_velocity_y):
+    def control(self, gravity, max_velocity_x, max_velocity_y): # Player Controls
         self.frame += 1
         if self.frame >= len(self.animation_database[self.state]):
             self.frame = 0
@@ -132,13 +132,13 @@ class Player():
         if self.velocity_y > max_velocity_y:
             self.velocity_y = max_velocity_y
 
-    def change_state(self, current_state, state):
+    def change_state(self, current_state, state): # Animation states
         if current_state != state:
             current_state = state
             self.frame = 0
         return current_state
 
-    def load_animation(self, path, frame_durations):
+    def load_animation(self, path, frame_durations): # Loads Animation
         global animation_frames
         animation_name = path.split('/')[-1]
         animation_frame_data = []
