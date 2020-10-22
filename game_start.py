@@ -2,6 +2,7 @@ import pygame, sys
 from player import Player
 from enemy import Enemy
 from items import Item
+from particle import Particle
 import maps
 
 clock = pygame.time.Clock()
@@ -24,6 +25,17 @@ for i in range(0, 3):
 gravity = 1
 max_velocity_x = 10
 max_velocity_y = 15
+
+# score
+score = 0
+font = pygame.font.Font('freesansbold.ttf', 25)
+
+particles = []
+
+def show_score(x, y):
+    score = player.kills * 100 + player.coins_collected * 10
+    screen.blit(font.render("Score: " + str(score), True, (255,255,255)), (x, y))
+
 # Attack Test
 attack_interval = 0
 isRight = True # TEMP Checks player Facing; can be later added to player class
@@ -33,8 +45,19 @@ camera_offset = [0, 0]
 while True: # game loop
     camera_offset[0] += int(player.x-camera_offset[0]-WINDOW_WIDTH/2 + player.image.get_width()/2)
     camera_offset[1] += int(player.y-camera_offset[1]-WINDOW_HEIGHT/2 + player.image.get_height()/2)
+    if camera_offset[0] < 0:
+        camera_offset[0] = 0
+    if camera_offset[1] < 0:
+        camera_offset[1] = 0
+    if camera_offset[0] > len(maps.map_five[0]) * maps.tile_size - WINDOW_WIDTH:
+        camera_offset[0] = len(maps.map_five[0]) * maps.tile_size - WINDOW_WIDTH
+    if camera_offset[1] > len(maps.map_five) * maps.tile_size - WINDOW_HEIGHT:
+        camera_offset[1] = len(maps.map_five) * maps.tile_size - WINDOW_HEIGHT
     solid_tiles = []
     end_tiles = []
+
+    if pygame.mouse.get_pressed()[0]:
+        particles.append(Particle(pygame.mouse.get_pos()))
 
     for event in pygame.event.get():
         if event.type == QUIT: # user closes the window
@@ -88,8 +111,18 @@ while True: # game loop
             player.hurt(enemy, screen)
         if len(attack) > 0: # Attack Check
             if enemy.hitbox.colliderect(attack[0]):
-                enemies.pop(enemies.index(enemy)) # Delete hit enemy
-    
+                enemy.hurt(player, enemies)
+                # enemies.pop(enemies.index(enemy)) # Delete hit enemy
+
+    for i in range(len(particles)-1, -1, -1):
+        particles[i].x += particles[i].velocity_x
+        particles[i].y += particles[i].velocity_y
+        pygame.draw.circle(screen, particles[i].color, (int(particles[i].x), int(particles[i].y)), int(particles[i].radius))
+        particles[i].radius -= .1
+        if particles[i].radius <= 0:
+            particles.pop(i)
+
+    show_score(500, 100)
     if not player.alive:
         text = pygame.font.Font(None, 20)
         text_surface = text.render("You died. :( press r to try again.", True, [255,255,255], [0,0,0])

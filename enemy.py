@@ -18,6 +18,16 @@ class Enemy():
         self.velocity_y = 0 # in the future add ai so it'll jump
         self.health = 6 # change later and add function to modify
 
+    def hurt(self, player, all_enemies):
+        self.health -= player.damage
+        if (player.x + player.image.get_width()/2) > (self.x + self.image.get_width()/2):
+            self.velocity_x = -20
+        else:
+            self.velocity_x = 20
+        if self.health <= 0:
+            player.kills += 1
+            all_enemies.remove(self)
+
     def update(self):
         self.rect.x += self.speedx
         self.rect.y += self.speedy

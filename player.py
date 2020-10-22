@@ -19,6 +19,7 @@ class Player():
         self.health = 10
         self.max_health = 10
         self.last_hit = 0
+        self.damage = 3
 
         self.state = "idle"
         self.frame = 0
@@ -28,6 +29,7 @@ class Player():
         self.animation_database["jump"] = self.load_animation("Assets/Sprites/player/jump", [1])
         self.animation_database["idle"] = self.load_animation("Assets/Sprites/player/idle", [1])
         # self.max_jumps = 1
+        self.kills = 0
         self.coins_collected = 0 # For Items
 
     def hurt(self, enemy, screen):
