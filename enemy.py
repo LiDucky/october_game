@@ -74,13 +74,3 @@ class Enemy():
         self.velocity_y += gravity
         if self.velocity_y > max_velocity_y:
             self.velocity_y = max_velocity_y
-
-# # I think this would go in game_start
-# all_sprites = pygame.sprite.Group()
-# enemies = pygame.sprite.Group()
-# player = Player()
-# all_sprites.add(player)
-# for i in range(8):
-#     e = enemy()
-#     all_sprites.add(e)
-#     enemies.add(e)

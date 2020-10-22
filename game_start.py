@@ -85,16 +85,11 @@ while True: # game loop
         enemy.do_movement(player, gravity, max_velocity_y)
         enemy.move(solid_tiles)
         if player.hitbox.colliderect(enemy.hitbox):
-<<<<<<< HEAD
             player.hurt(enemy, screen)
-
-=======
-            player.hurt(enemy.damage, screen)
         if len(attack) > 0: # Attack Check
             if enemy.hitbox.colliderect(attack[0]):
                 enemies.pop(enemies.index(enemy)) # Delete hit enemy
     
->>>>>>> 233d06cf6c1f7e8feda0b7d6544feafba3c2589e
     if not player.alive:
         text = pygame.font.Font(None, 20)
         text_surface = text.render("You died. :( press r to try again.", True, [255,255,255], [0,0,0])
