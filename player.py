@@ -20,6 +20,7 @@ class Player():
         self.max_health = 10
         self.last_hit = 0
         self.damage = 3
+        # self.weapon = ['sword']
 
         self.state = "idle"
         self.frame = 0

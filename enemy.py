@@ -3,10 +3,12 @@ import random
 
 # define colors
 GREEN = (0, 255, 0)
+global animation_frames
+animation_frames = {}
 
 class Enemy():
     def __init__(self):
-        self.image = pygame.image.load('Assets/Sprites/player/idle/idle0.png') # TODO: change to enemy image
+        self.image = pygame.image.load('Assets/Sprites/enemy/walk/walk0.png')
         self.image.convert()
         self.x = random.randrange(1920 - self.image.get_width()) #pass in window width
         self.y = 300 #random.randrange(-100, -40)
@@ -18,11 +20,17 @@ class Enemy():
         self.velocity_y = 0 # in the future add ai so it'll jump
         self.health = 6 # change later and add function to modify
 
-    def drop_stuff():
+        self.state = "idle"
+        self.frame = 0
+        self.flip = False
+        self.animation_database = {}
+        self.animation_database["walk"] = self.load_animation("Assets/Sprites/player/walk", [7,7])
+
+    def drop_stuff(self):
         random_num = random.randrange(1,100)
-            if random_num >=50:
-                item_drop = Item(self.x, self.y, "coin")
-                # items.append(item_drop) #need to append to the items list from game_start
+        if random_num >=50:
+            item_drop = Item(self.x, self.y, "coin")
+            # items.append(item_drop) #need to append to the items list from game_start
 
     def hurt(self, player, all_enemies):
         self.health -= player.damage
@@ -41,6 +49,7 @@ class Enemy():
             self.rect.x = random.randrange(WIDTH - self.rect.width)
             self.rect.y = random.randrange(-100, -40)
             self.speedy = random.randrange(1, 8)
+
 
     def collision_test(self, tiles):
         hit_list = []
@@ -77,11 +86,15 @@ class Enemy():
                 self.velocity_x -= 2
             if self.velocity_x <= -self.max_velocity_x:
                 self.velocity_x = -self.max_velocity_x
+            self.state = self.change_state(self.state, "walk")
+            self.flip = True
         elif player.x > self.x:
             if self.velocity_x < self.max_velocity_x:
                 self.velocity_x += 2
             if self.velocity_x >= self.max_velocity_x:
                 self.velocity_x = self.max_velocity_x
+            self.state = self.change_state(self.state, "walk")
+            self.flip = False
         if player.y < self.y:
             # do jump?
             if not self.has_jumped:
@@ -90,3 +103,25 @@ class Enemy():
         self.velocity_y += gravity
         if self.velocity_y > max_velocity_y:
             self.velocity_y = max_velocity_y
+    
+    def change_state(self, current_state, state):
+        if current_state != state:
+            current_state = state
+            self.frame = 0
+        return current_state
+
+    def load_animation(self, path, frame_durations):
+        global animation_frames
+        animation_name = path.split('/')[-1]
+        animation_frame_data = []
+        n = 0
+        for frame in frame_durations:
+            animation_frame_id = animation_name + str(n)
+            img_loc = path + "/" + animation_frame_id + ".png"
+            animation_image = pygame.image.load(img_loc)
+            animation_frames[animation_frame_id] = animation_image.copy()
+            for i in range(frame):
+                animation_frame_data.append(animation_frame_id)
+            n += 1
+        return animation_frame_data
+

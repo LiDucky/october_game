@@ -64,10 +64,14 @@ class Item():
     def functions(self, screen, camera_offset, player): # access all Item functions
         if self.pickup_delay > 0:
             self.pickup_delay -=1
-        if self.pickup_delay == 0:
-            self.player_contact(player)
-        self.floating()
+        #if self.pickup_delay == 0:
+            # self.player_contact(player)
+    #     self.speed = 7
+    #     self.hit = [3, 5]
+        # if self.hit 
+            #self.hurt -= enemy.damage  
+
+# V = enemy.position - player.position; if (length(V) <= player.attack_range) and (angle(V, player.gaze) <= some_small_angle) do_damage() –.floating()
         self.show(screen, camera_offset)
-       
     def sword(self):
         pass

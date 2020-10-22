@@ -16,7 +16,7 @@ pygame.display.set_caption('October Game') # change for actual title later
 # Window Size set
 WINDOW_HEIGHT = 1080
 WINDOW_WIDTH = 1920
-screen = pygame.display.set_mode(( WINDOW_WIDTH, WINDOW_HEIGHT ))
+screen = pygame.display.set_mode(( WINDOW_WIDTH, WINDOW_HEIGHT))
 
 #initialize "Player" Class
 player = Player()
@@ -38,11 +38,31 @@ def show_score(x, y):
     score = player.kills * 100 + player.coins_collected * 10
     screen.blit(font.render("Score: " + str(score), True, (255,255,255)), (x, y))
 
+def show_fps():
+    screen.blit(font.render(str(int(clock.get_fps())), True, (255,255,255)), (WINDOW_WIDTH - 100, 100))
+
 # Attack Test
 attack_interval = 0
 isRight = True # TEMP Checks player Facing; can be later added to player class
 
 camera_offset = [0, 0]
+
+click = False
+def main_menu():
+    def create_font(t, s=72, c=(255, 255, 255), b=False, i=False):
+        font = pygame.font.Font('freesansbold.ttf', s, bold=b, italic=i)
+        text = font.render(t, True, c)
+        return text
+    
+    while True:
+
+        mouse = pygame.mouse.get_pos()
+        start_game = create_font('START GAME')
+        button_1 = screen.blit(start_game, (560, 350))
+        start_game = create_font('START GAME')
+        button_1 = screen.blit(start_game, (560, 350))
+        start_game = create_font('START GAME')
+        button_1 = screen.blit(start_game, (560, 350))
 
 while True: # game loop
     camera_offset[0] += int(player.x-camera_offset[0]-WINDOW_WIDTH/2 + player.image.get_width()/2)
@@ -59,7 +79,7 @@ while True: # game loop
     end_tiles = []
 
     if pygame.mouse.get_pressed()[0]:
-        particles.append(Particle(pygame.mouse.get_pos()))
+        particles.append(Particle(pygame.mouse.get_pos()[0] - camera_offset[0], pygame.mouse.get_pos()[1] - camera_offset[1]))
 
     for event in pygame.event.get():
         if event.type == QUIT: # user closes the window
@@ -76,6 +96,8 @@ while True: # game loop
             if tile == 2:
                 screen.blit(maps.tile_two, (x * maps.tile_size - camera_offset[0], y * maps.tile_size - camera_offset[1]))
                 end_tiles.append(pygame.Rect(x * maps.tile_size, y * maps.tile_size, maps.tile_size, maps.tile_size))
+            if tile == 3:
+                screen.blit(maps.tile_three, (x * maps.tile_size - camera_offset[0], y * maps.tile_size - camera_offset[1]))
             if tile != 0 and tile != 2:
                 solid_tiles.append(pygame.Rect(x * maps.tile_size, y * maps.tile_size, maps.tile_size, maps.tile_size))
             x += 1
@@ -116,15 +138,8 @@ while True: # game loop
                 enemy.hurt(player, enemies)
                 # enemies.pop(enemies.index(enemy)) # Delete hit enemy
 
-    for i in range(len(particles)-1, -1, -1):
-        particles[i].x += particles[i].velocity_x
-        particles[i].y += particles[i].velocity_y
-        pygame.draw.circle(screen, particles[i].color, (int(particles[i].x), int(particles[i].y)), int(particles[i].radius))
-        particles[i].radius -= .1
-        if particles[i].radius <= 0:
-            particles.pop(i)
-
     show_score(500, 100)
+    show_fps()
     if not player.alive:
         text = pygame.font.Font(None, 20)
         text_surface = text.render("You died. :( press r to try again.", True, [255,255,255], [0,0,0])
@@ -135,7 +150,7 @@ while True: # game loop
         screen.blit(text_surface, (50, 50))
     screen.blit(pygame.transform.flip(player.image, player.flip, False), (player.x - camera_offset[0], player.y - camera_offset[1]))
     for enemy in enemies:
-        screen.blit(enemy.image, (enemy.x - camera_offset[0], enemy.y - camera_offset[1]))
+        screen.blit(pygame.transform.flip(enemy.image, enemy.flip, False), (enemy.x - camera_offset[0], enemy.y - camera_offset[1]))
     player.draw_health(camera_offset, screen)
     
     # kill the player if they fall too far:
@@ -144,6 +159,14 @@ while True: # game loop
     
     for item in items:
         item.functions(screen, camera_offset, player)
+    
+    for i in range(len(particles)-1, -1, -1):
+        particles[i].x += particles[i].velocity_x
+        particles[i].y += particles[i].velocity_y
+        pygame.draw.circle(screen, particles[i].color, (int(particles[i].x) - camera_offset[0], int(particles[i].y) - camera_offset[1]), int(particles[i].radius))
+        particles[i].radius -= .1
+        if particles[i].radius <= 0:
+            particles.pop(i)
     
     pygame.display.update()
     clock.tick(60) # run at 60fps
