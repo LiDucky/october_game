@@ -27,6 +27,7 @@ class Item():
         else:
             self.image = pygame.image.load(f"Assets\Sprites\items\default.png")
             self.image.convert()
+        self.pickup_delay = 20
     
     def player_contact(self, player): # Collision Check with player model
         if self.hitbox.colliderect(player.hitbox) and self.active:
@@ -61,9 +62,12 @@ class Item():
             screen.blit(self.image, (self.x - camera_offset[0], self.y - camera_offset[1]))
 
     def functions(self, screen, camera_offset, player): # access all Item functions
-        self.player_contact(player)
+        if self.pickup_delay > 0:
+            self.pickup_delay -=1
+        if self.pickup_delay == 0:
+            self.player_contact(player)
         self.floating()
         self.show(screen, camera_offset)
-
+       
     def sword(self):
         pass

@@ -18,6 +18,12 @@ class Enemy():
         self.velocity_y = 0 # in the future add ai so it'll jump
         self.health = 6 # change later and add function to modify
 
+    def drop_stuff():
+        random_num = random.randrange(1,100)
+            if random_num >=50:
+                item_drop = Item(self.x, self.y, "coin")
+                # items.append(item_drop) #need to append to the items list from game_start
+
     def hurt(self, player, all_enemies):
         self.health -= player.damage
         if (player.x + player.image.get_width()/2) > (self.x + self.image.get_width()/2):
