@@ -32,6 +32,7 @@ class Player():
         # self.max_jumps = 1
         self.kills = 0
         self.coins_collected = 0
+        self.isRight = True # for Attacks
 
     def hurt(self, enemy, screen): # Damages Player
         if self.last_hit > 30:
@@ -95,6 +96,7 @@ class Player():
         keys=pygame.key.get_pressed()
         if self.alive:
             if keys[pygame.K_LEFT]:
+                self.isRight = False
                 if self.velocity_x > -max_velocity_x:
                     self.velocity_x -= 2
                 else: 
@@ -102,6 +104,7 @@ class Player():
                 self.state = self.change_state(self.state, "walk")
                 self.flip = True
             elif keys[pygame.K_RIGHT]:
+                self.isRight = True
                 if self.velocity_x < max_velocity_x:
                     self.velocity_x += 2
                 else: 
@@ -123,11 +126,11 @@ class Player():
                 if keys[pygame.K_UP]:
                     self.airtime = self.max_airtime
                     self.velocity_y = -25
-        elif keys[pygame.K_r]: # Player repsawn
-            self.health = self.max_health
-            self.alive = True
-            self.x = 300
-            self.y = 1000
+        # elif keys[pygame.K_r]: # Player repsawn TEMP DISABLED
+        #     self.health = self.max_health
+        #     self.alive = True
+        #     self.x = 300
+        #     self.y = 1000
         self.velocity_y += gravity
         if self.velocity_y > max_velocity_y:
             self.velocity_y = max_velocity_y

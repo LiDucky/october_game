@@ -16,6 +16,7 @@ screen = pygame.display.set_mode(( WINDOW_WIDTH, WINDOW_HEIGHT))
 
 # Initialize "Player" Class
 player = Player()
+victory = False
 
 # World Settings
 camera_offset = [0, 0]
@@ -111,19 +112,16 @@ while True: # Main Game Loop
     player.last_hit += 1
     player.control(gravity, max_velocity_x, max_velocity_y)
     player.move(solid_tiles)
+    player.draw_health(camera_offset, screen)
 
     # Attack Logic
     attack = [] # Attack List
     if attack_interval > 0: # Attack interval timer
         attack_interval -= 1
     keys=pygame.key.get_pressed()
-    if keys[pygame.K_RIGHT]:
-        isRight = True # TEMP Checks player Facing; can be later added to player class
-    if keys[pygame.K_LEFT]:
-        isRight = False # TEMP Checks player Facing; can be later added to player class
     if keys[pygame.K_SPACE]: # Attack Command
         if attack_interval == 0:
-            if isRight:
+            if player.isRight:
                 attack1 = pygame.Rect(player.x + 50, player.y, player.image.get_width(), player.image.get_height())
                 pygame.draw.rect(screen,(255,0,0), (player.x + 50-camera_offset[0], player.y-camera_offset[1], player.image.get_width(), player.image.get_height())) # Insert attack animation here
                 attack.append(attack1)
@@ -137,6 +135,7 @@ while True: # Main Game Loop
     for enemy in enemies:
         enemy.do_movement(player, gravity, max_velocity_y)
         enemy.move(solid_tiles)
+        screen.blit(pygame.transform.flip(enemy.image, enemy.flip, False), (enemy.x - camera_offset[0], enemy.y - camera_offset[1]))
         if player.hitbox.colliderect(enemy.hitbox):
             player.hurt(enemy, screen)
         if len(attack) > 0: # Attack Check
@@ -148,18 +147,42 @@ while True: # Main Game Loop
         item.functions(screen, camera_offset, player)
 
     # Win / Lose Conditions
-    if not player.alive:
-        text = pygame.font.Font(None, 20)
-        text_surface = text.render("You died. :( press r to try again.", True, [255,255,255], [0,0,0])
-        screen.blit(text_surface, (50, 50))
+    if not player.alive and victory == False:
+        text_surface = font.render("Game Over! :( Press 'R' to Play Again.", True, [255,255,255], [0,0,0])
+        screen.blit(text_surface, (750, 50))
+        if keys[pygame.K_r]: # Player repsawn
+            score = 0
+            victory = False
+            player.health = player.max_health
+            player.alive = True
+            player.x = 300
+            player.y = 1000
+            enemies = spawn_enemy()
+            items = spawn_item()
     if player.check_win(end_tiles):
-        text = pygame.font.Font(None, 20)
-        text_surface = text.render("You win!", True, [255,255,255], [0,0,0])
-        screen.blit(text_surface, (50, 50))
+        if len(enemies) > 0:
+            text_surface = font.render("Defeat All Enemies!", True, [255,255,255], [0,0,0])
+            screen.blit(text_surface, (850, 50))
+        else:
+            victory = True
+            player.kill()
+    if victory:
+        text_surface = font.render("You win! Press 'R' to Play Again.", True, [255,255,255], [0,0,0])
+        screen.blit(text_surface, (800, 50))
+        if keys[pygame.K_r]: # Player repsawn
+            score = 0
+            victory = False
+            player.health = player.max_health
+            player.alive = True
+            player.x = 300
+            player.y = 1000
+            enemies = spawn_enemy()
+            items = spawn_item()
+
+
+    # Player Blit
     screen.blit(pygame.transform.flip(player.image, player.flip, False), (player.x - camera_offset[0], player.y - camera_offset[1]))
-    for enemy in enemies:
-        screen.blit(pygame.transform.flip(enemy.image, enemy.flip, False), (enemy.x - camera_offset[0], enemy.y - camera_offset[1]))
-    player.draw_health(camera_offset, screen)
+    
     
     # Particle Controls
     for i in range(len(particles)-1, -1, -1):
@@ -176,6 +199,7 @@ while True: # Main Game Loop
             pygame.quit()
             sys.exit()
 
+    
     show_score(500, 100)
     show_fps()
     pygame.display.update()
