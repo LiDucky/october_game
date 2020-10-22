@@ -3,6 +3,7 @@ from player import Player
 from enemy import Enemy
 from items import Item
 import maps
+import random
 
 clock = pygame.time.Clock()
 
@@ -19,6 +20,7 @@ screen = pygame.display.set_mode(( WINDOW_WIDTH, WINDOW_HEIGHT ))
 #initialize "Player" Class
 player = Player()
 enemies = []
+items = []
 for i in range(0, 3):
     enemies.append(Enemy())
 gravity = 1
@@ -79,7 +81,7 @@ while True: # game loop
                 attack1 = pygame.Rect(player.x - 50, player.y, player.image.get_width(), player.image.get_height())
                 pygame.draw.rect(screen,(255,0,0), (player.x - 50-camera_offset[0], player.y-camera_offset[1], player.image.get_width(), player.image.get_height())) # Insert attack animation here
                 attack.append(attack1)
-            attack_interval = 50 # Sets max attack delay
+            attack_interval = 15 # Sets max attack delay
 
     for enemy in enemies:
         enemy.do_movement(player, gravity, max_velocity_y)
@@ -88,6 +90,10 @@ while True: # game loop
             player.hurt(enemy, screen)
         if len(attack) > 0: # Attack Check
             if enemy.hitbox.colliderect(attack[0]):
+                random_num = random.randrange(1,100)
+                if random_num >=50:
+                    item_drop = Item(enemy.x, enemy.y, "coin")
+                    items.append(item_drop)
                 enemies.pop(enemies.index(enemy)) # Delete hit enemy
     
     if not player.alive:
@@ -106,7 +112,9 @@ while True: # game loop
     # kill the player if they fall too far:
     # if player.y > WINDOW_HEIGHT:
     #     player.kill(screen)
-
-
+    
+    for item in items:
+        item.functions(screen, camera_offset, player)
+    
     pygame.display.update()
     clock.tick(60) # run at 60fps
