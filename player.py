@@ -8,7 +8,6 @@ animation_frames = {}
 class Player():
     def __init__(self):
         self.image = pygame.image.load('Assets/Sprites/player/idle/idle0.png')
-        self.image.convert()
         self.max_airtime = 6
         self.airtime = 0
         self.x = 300
@@ -17,8 +16,8 @@ class Player():
         self.velocity_x = 0
         self.velocity_y = 0
         self.alive = True
-        self.health = 6
-        self.max_health = 20
+        self.health = 10
+        self.max_health = 10
         self.last_hit = 0
 
         self.state = "idle"
@@ -31,9 +30,13 @@ class Player():
         # self.max_jumps = 1
         self.coins_collected = 0 # For Items
 
-    def hurt(self, damage, screen):
-        if self.last_hit > 60:
-            self.health -= damage
+    def hurt(self, enemy, screen):
+        if self.last_hit > 30:
+            if (self.x + self.image.get_width()/2) < (enemy.x + enemy.image.get_width()/2):
+                self.velocity_x = -20
+            else:
+                self.velocity_x = 20
+            self.health -= enemy.damage
             self.last_hit = 0
             if self.health <= 0:
                 self.kill(screen)
@@ -75,11 +78,6 @@ class Player():
         self.hitbox = pygame.Rect(self.x, self.y, 50, 60)
         return self.image.get_rect
 
-    
-
-    def attack(self):
-        pass
-
     def check_win(self, tiles):
         player_rect = self.image.get_rect(left=self.x, top=self.y)
         for tile in tiles:
@@ -94,21 +92,17 @@ class Player():
         keys=pygame.key.get_pressed()
         if self.alive:
             if keys[pygame.K_LEFT]:
-                if self.velocity_x > 0:
-                    self.velocity_x = 0
-                elif self.velocity_x > -max_velocity_x:
+                if self.velocity_x > -max_velocity_x:
                     self.velocity_x -= 2
                 else: 
-                    max_velocity_x = -max_velocity_x
+                    velocity_x = -max_velocity_x
                 self.state = self.change_state(self.state, "walk")
                 self.flip = True
             elif keys[pygame.K_RIGHT]:
-                if self.velocity_x < 0:
-                    self.velocity_x = 0
-                elif self.velocity_x < max_velocity_x:
+                if self.velocity_x < max_velocity_x:
                     self.velocity_x += 2
                 else: 
-                    max_velocity_x = max_velocity_x
+                    velocity_x = max_velocity_x
                 self.state = self.change_state(self.state, "walk")
                 self.flip = False
             else:
@@ -127,6 +121,7 @@ class Player():
                     self.airtime = self.max_airtime
                     self.velocity_y = -25
         elif keys[pygame.K_r]: # Player repsawn
+            self.health = self.max_health
             self.alive = True
             self.x = 300
             self.y = 1000
@@ -148,7 +143,7 @@ class Player():
         for frame in frame_durations:
             animation_frame_id = animation_name + str(n)
             img_loc = path + "/" + animation_frame_id + ".png"
-            animation_image = pygame.image.load(img_loc).convert()
+            animation_image = pygame.image.load(img_loc)
             animation_frames[animation_frame_id] = animation_image.copy()
             for i in range(frame):
                 animation_frame_data.append(animation_frame_id)

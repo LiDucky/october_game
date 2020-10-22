@@ -11,7 +11,9 @@ class Enemy():
         self.x = random.randrange(1920 - self.image.get_width()) #pass in window width
         self.y = 300 #random.randrange(-100, -40)
         self.hitbox = pygame.Rect(self.x, self.y, 50, 60)
+        self.has_jumped = True;
         self.damage = 1
+        self.max_velocity_x = 8
         self.velocity_x = 0 # in the future add ai so it'll jump
         self.velocity_y = 0 # in the future add ai so it'll jump
         self.health = 6 # change later and add function to modify
@@ -44,6 +46,7 @@ class Enemy():
         hit_list = self.collision_test(tiles)
         for tile in hit_list:
             if self.velocity_y > 0:
+                self.has_jumped = False
                 self.y = tile.top - int(self.image.get_height()) # collide on bottom side
                 self.velocity_y = 0
             elif self.velocity_y < 0:
@@ -52,12 +55,25 @@ class Enemy():
         self.hitbox = pygame.Rect(self.x, self.y, 50, 60)
         return self.image.get_rect
 
-    def do_movement(self, gravity, max_velocity):
-        # this will end up being tied to our ai
-        self.velocity_x = -5
+    def do_movement(self, player, gravity, max_velocity_y):
+        if player.x < self.x:
+            if self.velocity_x > -self.max_velocity_x:
+                self.velocity_x -= 2
+            if self.velocity_x <= -self.max_velocity_x:
+                self.velocity_x = -self.max_velocity_x
+        elif player.x > self.x:
+            if self.velocity_x < self.max_velocity_x:
+                self.velocity_x += 2
+            if self.velocity_x >= self.max_velocity_x:
+                self.velocity_x = self.max_velocity_x
+        if player.y < self.y:
+            # do jump?
+            if not self.has_jumped:
+                self.has_jumped = True
+                self.velocity_y = -20 # add ground condition, flying enemies are a no-go.
         self.velocity_y += gravity
-        if self.velocity_y > max_velocity:
-            self.velocity_y = max_velocity
+        if self.velocity_y > max_velocity_y:
+            self.velocity_y = max_velocity_y
 
 # # I think this would go in game_start
 # all_sprites = pygame.sprite.Group()

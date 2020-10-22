@@ -31,6 +31,8 @@ while True: # game loop
     camera_offset[1] += int(player.y-camera_offset[1]-WINDOW_HEIGHT/2 + player.image.get_height()/2)
     solid_tiles = []
     end_tiles = []
+
+
     
     for event in pygame.event.get():
         if event.type == QUIT: # user closes the window
@@ -56,10 +58,10 @@ while True: # game loop
     player.control(gravity, max_velocity_x, max_velocity_y)
     player.move(solid_tiles)
     for enemy in enemies:
-        enemy.do_movement(gravity, max_velocity_y)
+        enemy.do_movement(player, gravity, max_velocity_y)
         enemy.move(solid_tiles)
         if player.hitbox.colliderect(enemy.hitbox):
-            player.hurt(enemy.damage, screen)
+            player.hurt(enemy, screen)
 
     if not player.alive:
         text = pygame.font.Font(None, 20)

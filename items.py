@@ -64,3 +64,6 @@ class Item():
         self.player_contact(player)
         self.floating()
         self.show(screen, camera_offset)
+
+    def sword(self):
+        pass
