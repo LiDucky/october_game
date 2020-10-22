@@ -1,6 +1,7 @@
 import pygame, sys
 from player import Player
 from enemy import Enemy
+from items import Item
 import maps
 
 clock = pygame.time.Clock()
@@ -23,6 +24,9 @@ for i in range(0, 3):
 gravity = 1
 max_velocity_x = 10
 max_velocity_y = 15
+# Attack Test
+attack_interval = 0
+isRight = True # TEMP Checks player Facing; can be later added to player class
 
 camera_offset = [0, 0]
 
@@ -32,8 +36,6 @@ while True: # game loop
     solid_tiles = []
     end_tiles = []
 
-
-    
     for event in pygame.event.get():
         if event.type == QUIT: # user closes the window
             pygame.quit()
@@ -57,12 +59,42 @@ while True: # game loop
     player.last_hit += 1
     player.control(gravity, max_velocity_x, max_velocity_y)
     player.move(solid_tiles)
+
+    # Attack Test
+    attack = [] # Attack List
+    if attack_interval > 0: # Attack interval timer
+        attack_interval -= 1
+    keys=pygame.key.get_pressed()
+    if keys[pygame.K_RIGHT]:
+        isRight = True # TEMP Checks player Facing; can be later added to player class
+    if keys[pygame.K_LEFT]:
+        isRight = False # TEMP Checks player Facing; can be later added to player class
+    if keys[pygame.K_SPACE]: # Attack Command
+        if attack_interval == 0:
+            if isRight:
+                attack1 = pygame.Rect(player.x + 50, player.y, player.image.get_width(), player.image.get_height())
+                pygame.draw.rect(screen,(255,0,0), (player.x + 50-camera_offset[0], player.y-camera_offset[1], player.image.get_width(), player.image.get_height())) # Insert attack animation here
+                attack.append(attack1)
+            else:
+                attack1 = pygame.Rect(player.x - 50, player.y, player.image.get_width(), player.image.get_height())
+                pygame.draw.rect(screen,(255,0,0), (player.x - 50-camera_offset[0], player.y-camera_offset[1], player.image.get_width(), player.image.get_height())) # Insert attack animation here
+                attack.append(attack1)
+            attack_interval = 50 # Sets max attack delay
+
     for enemy in enemies:
         enemy.do_movement(player, gravity, max_velocity_y)
         enemy.move(solid_tiles)
         if player.hitbox.colliderect(enemy.hitbox):
+<<<<<<< HEAD
             player.hurt(enemy, screen)
 
+=======
+            player.hurt(enemy.damage, screen)
+        if len(attack) > 0: # Attack Check
+            if enemy.hitbox.colliderect(attack[0]):
+                enemies.pop(enemies.index(enemy)) # Delete hit enemy
+    
+>>>>>>> 233d06cf6c1f7e8feda0b7d6544feafba3c2589e
     if not player.alive:
         text = pygame.font.Font(None, 20)
         text_surface = text.render("You died. :( press r to try again.", True, [255,255,255], [0,0,0])
@@ -79,6 +111,7 @@ while True: # game loop
     # kill the player if they fall too far:
     # if player.y > WINDOW_HEIGHT:
     #     player.kill(screen)
+
 
     pygame.display.update()
     clock.tick(60) # run at 60fps
