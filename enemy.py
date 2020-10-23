@@ -1,5 +1,6 @@
 import pygame
 import random
+from items import Item
 
 # define colors
 GREEN = (0, 255, 0)
@@ -7,11 +8,11 @@ global animation_frames
 animation_frames = {}
 
 class Enemy():
-    def __init__(self):
+    def __init__(self, x=100, y=100): # Initialize Enemy
         self.image = pygame.image.load('Assets/Sprites/enemy/walk/walk0.png')
         self.image.convert()
-        self.x = random.randrange(1920 - self.image.get_width()) #pass in window width
-        self.y = 300 #random.randrange(-100, -40)
+        self.x = x #pass in window width
+        self.y = y #random.randrange(-100, -40)
         self.hitbox = pygame.Rect(self.x, self.y, 50, 60)
         self.has_jumped = True;
         self.damage = 1
@@ -26,13 +27,16 @@ class Enemy():
         self.animation_database = {}
         self.animation_database["walk"] = self.load_animation("Assets/Sprites/player/walk", [7,7])
 
-    def drop_stuff(self):
+    def drop_stuff(self, all_items): # Drop on defeat
         random_num = random.randrange(1,100)
-        if random_num >=50:
+        if 50 < random_num < 76: # 25 % chance to drop coin
             item_drop = Item(self.x, self.y, "coin")
-            # items.append(item_drop) #need to append to the items list from game_start
+            all_items.append(item_drop)
+        elif 75 < random_num < 101: # 25 % chance to drop health
+            item_drop = Item(self.x, self.y, "health")
+            all_items.append(item_drop)
 
-    def hurt(self, player, all_enemies):
+    def hurt(self, player, all_enemies): # Deal Damage / Defeat Check
         self.health -= player.damage
         if (player.x + player.image.get_width()/2) > (self.x + self.image.get_width()/2):
             self.velocity_x = -20
@@ -41,8 +45,13 @@ class Enemy():
         if self.health <= 0:
             player.kills += 1
             all_enemies.remove(self)
+    
+    def damage_check(self, player, all_items, all_enemies): # Check health for drop
+        if (self.health - player.damage) <= 0:
+            self.drop_stuff(all_items)
+        self.hurt(player, all_enemies)
 
-    def update(self):
+    def update(self): # Update hitbox
         self.rect.x += self.speedx
         self.rect.y += self.speedy
         if self.rect.top > HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WIDTH + 20:
@@ -51,7 +60,7 @@ class Enemy():
             self.speedy = random.randrange(1, 8)
 
 
-    def collision_test(self, tiles):
+    def collision_test(self, tiles): # World Collide
         hit_list = []
         player_rect = self.image.get_rect(left=self.x, top=self.y)
         for tile in tiles:
@@ -59,7 +68,7 @@ class Enemy():
                 hit_list.append(tile)
         return hit_list
 
-    def move(self, tiles):
+    def move(self, tiles): # World Collide
         self.x += self.velocity_x
         hit_list = self.collision_test(tiles)
         for tile in hit_list:
@@ -80,7 +89,7 @@ class Enemy():
         self.hitbox = pygame.Rect(self.x, self.y, 50, 60)
         return self.image.get_rect
 
-    def do_movement(self, player, gravity, max_velocity_y):
+    def do_movement(self, player, gravity, max_velocity_y): # Enemy AI
         if player.x < self.x:
             if self.velocity_x > -self.max_velocity_x:
                 self.velocity_x -= 2
@@ -104,13 +113,13 @@ class Enemy():
         if self.velocity_y > max_velocity_y:
             self.velocity_y = max_velocity_y
     
-    def change_state(self, current_state, state):
+    def change_state(self, current_state, state): # Checks Animation State
         if current_state != state:
             current_state = state
             self.frame = 0
         return current_state
 
-    def load_animation(self, path, frame_durations):
+    def load_animation(self, path, frame_durations): # Loads Animation
         global animation_frames
         animation_name = path.split('/')[-1]
         animation_frame_data = []

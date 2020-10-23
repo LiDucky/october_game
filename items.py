@@ -10,6 +10,7 @@ class Item():
         self.width = 64
         self.height = 64
         self.hitbox = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.pickup_delay = 20
         # Item Status
         self.active = True 
         self.isCoin = False
@@ -17,6 +18,7 @@ class Item():
         # For animation
         self.move_count = 0
         self.isFloating = False
+        # Image Load
         if item_type in item_type_list:
             self.image = pygame.image.load(f"Assets\Sprites\items\{item_type}.png")
             self.image.convert()
@@ -24,11 +26,10 @@ class Item():
                 self.isCoin = True
             if item_type == "health":
                 self.isHealth = True
-        else:
+        else: # Sets Default Image
             self.image = pygame.image.load(f"Assets\Sprites\items\default.png")
             self.image.convert()
-        self.pickup_delay = 20
-    
+        
     def player_contact(self, player): # Collision Check with player model
         if self.hitbox.colliderect(player.hitbox) and self.active:
             if self.isCoin == True: # If item is a Coin, increases coins collected in player model
@@ -64,9 +65,10 @@ class Item():
     def functions(self, screen, camera_offset, player): # access all Item functions
         if self.pickup_delay > 0:
             self.pickup_delay -=1
-        if self.pickup_delay == 0:
+        elif self.pickup_delay == 0:
             self.player_contact(player)
-
+        self.floating()
         self.show(screen, camera_offset)
+
     def sword(self):
         pass
