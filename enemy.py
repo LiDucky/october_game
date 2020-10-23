@@ -63,28 +63,24 @@ class Enemy():
             self.speedy = random.randrange(1, 8)
 
 
-    def collision_test(self, tiles, enemies): # World Collide
+    def collision_test(self, tiles): # World Collide
         hit_list = []
         self_rect = self.image.get_rect(left=self.x, top=self.y)
-        for enemy in enemies:
-            if self != enemy:
-                if self_rect.colliderect(enemy.hitbox):
-                    hit_list.append(enemy.hitbox)
         for tile in tiles:
             if self_rect.colliderect(tile):
                 hit_list.append(tile)
         return hit_list
 
-    def move(self, tiles, enemies): # World Collide
+    def move(self, tiles): # World Collide
         self.x += self.velocity_x
-        hit_list = self.collision_test(tiles, enemies)
+        hit_list = self.collision_test(tiles)
         for tile in hit_list:
             if self.velocity_x > 0:
                 self.x = tile.left - int(self.image.get_width()) # collide on right side
             elif self.velocity_x < 0:
                 self.x = tile.right # collide on left side
         self.y += self.velocity_y
-        hit_list = self.collision_test(tiles, [])
+        hit_list = self.collision_test(tiles)
         for tile in hit_list:
             if self.velocity_y > 0:
                 self.has_jumped = False

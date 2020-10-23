@@ -17,6 +17,7 @@ flags = 0#pygame.FULLSCREEN
 screen = pygame.display.set_mode(( WINDOW_WIDTH, WINDOW_HEIGHT), flags, 16)
 
 # World Settings
+background = pygame.image.load('Assets/Sprites/background.jpg')
 camera_offset = [0, 0]
 gravity = 1
 max_velocity_x = 10
@@ -81,6 +82,7 @@ items = spawn_item()
 def level_reset(player, victory, wave, level_active, enemies, items, message_timer, message_timer_max):
     player.coins_collected = 0
     player.kills = 0
+    player.velocity_x = 0
     victory = False
     player.health = player.max_health
     player.alive = True
@@ -106,7 +108,7 @@ def main_menu():
         return text
     
     while True:
-        screen.fill((0, 0, 0))
+        screen.blit(background, (0,0))
         mouse = pygame.mouse.get_pos()
         start_game = create_font('PLAY')
         button_1 = screen.blit(start_game, (560, 350))
@@ -160,7 +162,7 @@ while True: # game loop
     solid_tiles = []
     end_tiles = []
 
-    screen.fill((0,0,0))
+    screen.blit(background, (0,0))
     y = 0
     for row in maps.map_five:
         x = 0
@@ -185,7 +187,7 @@ while True: # game loop
     # Enemy Controls
     for enemy in enemies:
         enemy.do_movement(player, gravity, max_velocity_y)
-        enemy.move(solid_tiles, enemies)
+        enemy.move(solid_tiles)
         screen.blit(pygame.transform.flip(enemy.image, enemy.flip, False), (enemy.x - camera_offset[0], enemy.y - camera_offset[1]))
         if player.hitbox.colliderect(enemy.hitbox):
             player.hurt(enemy, screen)
@@ -212,7 +214,7 @@ while True: # game loop
             screen.blit(text_surface, (800, 50))
             player.kill()
             if keys[pygame.K_r]: # Player repsawn
-               victory, wave, level_active, enemies, items, message_timer = level_reset(player, victory, wave, level_active, enemies, items, message_timer, message_timer_max)
+                victory, wave, level_active, enemies, items, message_timer = level_reset(player, victory, wave, level_active, enemies, items, message_timer, message_timer_max)
         else:
             text_surface = font.render("Defeat All Enemies!", True, [255,255,255], [0,0,0])
             screen.blit(text_surface, (850, 50))
