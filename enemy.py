@@ -9,7 +9,7 @@ animation_frames = {}
 
 class Enemy():
     def __init__(self, x=100, y=100): # Initialize Enemy
-        self.image = pygame.image.load('Assets/Sprites/enemy/walk/walk0.png')
+        self.image = pygame.image.load('Assets/Sprites/enemy/walk/walk1.png')
         self.image.convert()
         self.x = x #pass in window width
         self.y = y #random.randrange(-100, -40)
@@ -21,11 +21,11 @@ class Enemy():
         self.velocity_y = 0 # in the future add ai so it'll jump
         self.health = 6 # change later and add function to modify
 
-        self.state = "idle"
+        self.state = "walk"
         self.frame = 0
         self.flip = False
         self.animation_database = {}
-        self.animation_database["walk"] = self.load_animation("Assets/Sprites/player/walk", [7,7])
+        self.animation_database["walk"] = self.load_animation("Assets/Sprites/enemy/walk", [7,7])
 
     def drop_stuff(self, all_items): # Drop on defeat
         random_num = random.randrange(1,100)
@@ -90,6 +90,10 @@ class Enemy():
         return self.image.get_rect
 
     def do_movement(self, player, gravity, max_velocity_y): # Enemy AI
+        self.frame += 1
+        if self.frame >= len(self.animation_database[self.state]):
+            self.frame = 0
+        self.image = animation_frames[self.animation_database[self.state][self.frame]]
         if player.x < self.x:
             if self.velocity_x > -self.max_velocity_x:
                 self.velocity_x -= 2
@@ -105,7 +109,6 @@ class Enemy():
             self.state = self.change_state(self.state, "walk")
             self.flip = False
         if player.y + player.image.get_height() < self.y + self.image.get_height():
-            # do jump?
             if not self.has_jumped:
                 self.has_jumped = True
                 self.velocity_y = -20 # add ground condition, flying enemies are a no-go.
