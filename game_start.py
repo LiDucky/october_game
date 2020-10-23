@@ -145,13 +145,13 @@ while True: # game loop
     keys=pygame.key.get_pressed()
     if keys[pygame.K_SPACE]: # Attack Command
         if attack_interval == 0:
-            if player.isRight:
-                attack1 = pygame.Rect(player.x + 50, player.y, player.image.get_width(), player.image.get_height())
-                pygame.draw.rect(screen,(255,0,0), (player.x + 50-camera_offset[0], player.y-camera_offset[1], player.image.get_width(), player.image.get_height())) # Insert attack animation here
-                attack.append(attack1)
-            else:
+            if player.flip:
                 attack1 = pygame.Rect(player.x - 50, player.y, player.image.get_width(), player.image.get_height())
                 pygame.draw.rect(screen,(255,0,0), (player.x - 50-camera_offset[0], player.y-camera_offset[1], player.image.get_width(), player.image.get_height())) # Insert attack animation here
+                attack.append(attack1)
+            else:
+                attack1 = pygame.Rect(player.x + 50, player.y, player.image.get_width(), player.image.get_height())
+                pygame.draw.rect(screen,(255,0,0), (player.x + 50-camera_offset[0], player.y-camera_offset[1], player.image.get_width(), player.image.get_height())) # Insert attack animation here
                 attack.append(attack1)
             attack_interval = 15 # Sets max attack delay
 
@@ -175,7 +175,8 @@ while True: # game loop
         text_surface = font.render("Game Over! :( Press 'R' to Play Again.", True, [255,255,255], [0,0,0])
         screen.blit(text_surface, (750, 50))
         if keys[pygame.K_r]: # Player repsawn
-            score = 0
+            player.coins_collected = 0
+            player.kills = 0
             victory = False
             player.health = player.max_health
             player.alive = True
@@ -194,7 +195,8 @@ while True: # game loop
         text_surface = font.render("You win! Press 'R' to Play Again.", True, [255,255,255], [0,0,0])
         screen.blit(text_surface, (800, 50))
         if keys[pygame.K_r]: # Player repsawn
-            score = 0
+            player.coins_collected = 0
+            player.kills = 0
             victory = False
             player.health = player.max_health
             player.alive = True
