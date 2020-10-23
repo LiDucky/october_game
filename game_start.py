@@ -174,7 +174,8 @@ while True: # game loop
         text_surface = font.render("Game Over! :( Press 'R' to Play Again.", True, [255,255,255], [0,0,0])
         screen.blit(text_surface, (750, 50))
         if keys[pygame.K_r]: # Player repsawn
-            score = 0
+            player.coins_collected = 0
+            player.kills = 0
             victory = False
             player.health = player.max_health
             player.alive = True
@@ -193,7 +194,8 @@ while True: # game loop
         text_surface = font.render("You win! Press 'R' to Play Again.", True, [255,255,255], [0,0,0])
         screen.blit(text_surface, (800, 50))
         if keys[pygame.K_r]: # Player repsawn
-            score = 0
+            player.coins_collected = 0
+            player.kills = 0
             victory = False
             player.health = player.max_health
             player.alive = True
