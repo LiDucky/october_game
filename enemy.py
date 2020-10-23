@@ -95,7 +95,7 @@ class Enemy():
                 self.velocity_x = self.max_velocity_x
             self.state = self.change_state(self.state, "walk")
             self.flip = False
-        if player.y < self.y:
+        if player.y + player.image.get_height() < self.y + self.image.get_height():
             # do jump?
             if not self.has_jumped:
                 self.has_jumped = True

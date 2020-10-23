@@ -16,7 +16,8 @@ pygame.display.set_caption('October Game') # change for actual title later
 # Window Size set
 WINDOW_HEIGHT = 1080
 WINDOW_WIDTH = 1920
-screen = pygame.display.set_mode(( WINDOW_WIDTH, WINDOW_HEIGHT))
+flags = 0
+screen = pygame.display.set_mode(( WINDOW_WIDTH, WINDOW_HEIGHT), flags, 16)
 
 #initialize "Player" Class
 player = Player()
@@ -47,23 +48,48 @@ isRight = True # TEMP Checks player Facing; can be later added to player class
 
 camera_offset = [0, 0]
 
-click = False
 def main_menu():
+    click = False
     def create_font(t, s=72, c=(255, 255, 255), b=False, i=False):
         font = pygame.font.Font('freesansbold.ttf', s, bold=b, italic=i)
         text = font.render(t, True, c)
         return text
     
     while True:
-
+        screen.fill((0, 0, 0))
         mouse = pygame.mouse.get_pos()
         start_game = create_font('START GAME')
         button_1 = screen.blit(start_game, (560, 350))
-        start_game = create_font('START GAME')
-        button_1 = screen.blit(start_game, (560, 350))
-        start_game = create_font('START GAME')
-        button_1 = screen.blit(start_game, (560, 350))
+        options = create_font('OPTIONS')
+        button_2 = screen.blit(options, (605, 425))
+        start_game = create_font('QUIT')
+        options = screen.blit(options, (655, 500))
 
+        start_game = create_font('GAME TITLE', 100, (255, 255, 255), False, False)
+        screen.blit(start_game, (500, 50))
+
+        if button_1.collidepoint(mouse):
+            if click:
+                break # if game_loop is put into a function, call it here.
+        if button_2.collidepoint(mouse):
+            if click:
+                break
+
+        click = False 
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == KEYDOWN:
+                if event.type == K_ESCAPE:
+                    running = False
+            if event.type == MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click = True
+        pygame.display.update()
+        clock.tick(60)
+
+main_menu()
 while True: # game loop
     camera_offset[0] += int(player.x-camera_offset[0]-WINDOW_WIDTH/2 + player.image.get_width()/2)
     camera_offset[1] += int(player.y-camera_offset[1]-WINDOW_HEIGHT/2 + player.image.get_height()/2)
@@ -79,7 +105,7 @@ while True: # game loop
     end_tiles = []
 
     if pygame.mouse.get_pressed()[0]:
-        particles.append(Particle(pygame.mouse.get_pos()[0] - camera_offset[0], pygame.mouse.get_pos()[1] - camera_offset[1]))
+        particles.append(Particle(pygame.mouse.get_pos()[0] + camera_offset[0], pygame.mouse.get_pos()[1] + camera_offset[1]))
 
     for event in pygame.event.get():
         if event.type == QUIT: # user closes the window
@@ -163,7 +189,7 @@ while True: # game loop
     for i in range(len(particles)-1, -1, -1):
         particles[i].x += particles[i].velocity_x
         particles[i].y += particles[i].velocity_y
-        pygame.draw.circle(screen, particles[i].color, (int(particles[i].x) - camera_offset[0], int(particles[i].y) - camera_offset[1]), int(particles[i].radius))
+        pygame.draw.circle(screen, particles[i].color, (int(particles[i].x - camera_offset[0]), int(particles[i].y - camera_offset[1])), int(particles[i].radius))
         particles[i].radius -= .1
         if particles[i].radius <= 0:
             particles.pop(i)
