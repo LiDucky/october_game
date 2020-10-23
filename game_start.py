@@ -53,14 +53,12 @@ def show_score(x, y):
 # Enemy Spawn
 def spawn_enemy():
     enemies = []
-    for i in range(0, 3):
-        enemies.append(Enemy())
     return enemies
 enemies = spawn_enemy()
 
 # Item Spawn
 def spawn_item():
-    items = [Item(1280,750, "coin"),Item(1085, 270, "health"),Item(1580, 1050, "health"),Item(2175, 1230, "coin"),Item(380, 270, "coin")]
+    items = []
     return items
 items = spawn_item()
 
@@ -161,7 +159,6 @@ while True: # game loop
             player.hurt(enemy, screen)
         if len(player.attack) > 0: # Attack Check
             if enemy.hitbox.colliderect(player.attack[0]):
-                player.attack = []
                 enemy.damage_check(player, items, enemies)
 
     # Item Controls
@@ -223,7 +220,7 @@ while True: # game loop
             pygame.quit()
             sys.exit()
 
-    
+    player.attack = []
     show_score(500, 100)
     show_fps()
     pygame.display.update()
