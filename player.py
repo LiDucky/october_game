@@ -20,6 +20,8 @@ class Player():
         self.max_health = 10
         self.last_hit = 0
         self.damage = 3
+        self.attack_delay = 0
+        self.attack = []
         # self.weapon = ['sword']
 
         self.state = "idle"
@@ -29,10 +31,11 @@ class Player():
         self.animation_database["walk"] = self.load_animation("Assets/Sprites/player/walk", [7,7])
         self.animation_database["jump"] = self.load_animation("Assets/Sprites/player/jump", [1])
         self.animation_database["idle"] = self.load_animation("Assets/Sprites/player/idle", [1])
+        self.animation_database["attack"] = self.load_animation("Assets/Sprites/player/attack", [7,8])
+        self.animation_database["fall"] = self.load_animation("Assets/Sprites/player/fall", [1])
         # self.max_jumps = 1
         self.kills = 0
         self.coins_collected = 0
-        self.isRight = True # for Attacks
 
     def hurt(self, enemy, screen): # Damages Player
         if self.last_hit > 30:
@@ -57,9 +60,9 @@ class Player():
         return hit_list
 
     def draw_health(self, camera_offset, screen): # Draws Health Bar
-        pygame.draw.rect(screen, RED, (50, 50, self.max_health, 10))
+        pygame.draw.rect(screen, RED, (50, 50, self.max_health * 20, 10)) # *20 to increase health bar length
         if self.health > 0:
-            pygame.draw.rect(screen, GREEN, (50, 50, self.health, 10))
+            pygame.draw.rect(screen, GREEN, (50, 50, self.health * 20, 10))
 
     def move(self, tiles): # World Collision
         self.x += self.velocity_x
@@ -96,7 +99,6 @@ class Player():
         keys=pygame.key.get_pressed()
         if self.alive:
             if keys[pygame.K_LEFT]:
-                self.isRight = False
                 if self.velocity_x > -max_velocity_x:
                     self.velocity_x -= 2
                 else: 
@@ -104,7 +106,6 @@ class Player():
                 self.state = self.change_state(self.state, "walk")
                 self.flip = True
             elif keys[pygame.K_RIGHT]:
-                self.isRight = True
                 if self.velocity_x < max_velocity_x:
                     self.velocity_x += 2
                 else: 
@@ -119,8 +120,24 @@ class Player():
                 else:
                     self.velocity_x = 0
                 self.state = self.change_state(self.state, "idle")
+            if self.attack_delay > 0:
+                self.attack_delay -= 1
+            if keys[pygame.K_SPACE]:
+                if self.attack_delay == 0:
+                    self.state = self.change_state(self.state, "attack")
+                    if self.flip:
+                        attack1 = pygame.Rect(self.x - self.image.get_width(), self.y, self.image.get_width(), self.image.get_height())
+                        # Insert attack animation here
+                        self.attack.append(attack1)
+                    else:
+                        attack1 = pygame.Rect(self.x + self.image.get_width(), self.y, self.image.get_width(), self.image.get_height())
+                        # Insert attack animation here
+                        self.attack.append(attack1)
+                    self.attack_delay = 15 # Sets max attack delay
             if self.velocity_y < 0:
                 self.state = self.change_state(self.state, "jump")
+            elif self.velocity_y > 0:
+                self.state = self.change_state(self.state, "fall")
             if self.airtime < self.max_airtime:
                 self.airtime += 1
                 if keys[pygame.K_UP]:
@@ -136,7 +153,9 @@ class Player():
             self.velocity_y = max_velocity_y
 
     def change_state(self, current_state, state): # Animation states
-        if current_state != state:
+        if current_state == "attack" and self.frame != 9:
+            pass
+        elif current_state != state:
             current_state = state
             self.frame = 0
         return current_state

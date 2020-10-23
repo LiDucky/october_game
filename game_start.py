@@ -4,15 +4,17 @@ from enemy import Enemy
 from items import Item
 from particle import Particle
 from pygame.locals import *
+# from os import path
 pygame.init()
 pygame.mixer.init()
 pygame.display.set_caption('October Game') # change for actual title later
 clock = pygame.time.Clock()
+# load_data()
 
 # Window Size set
 WINDOW_HEIGHT = 1080
 WINDOW_WIDTH = 1920
-flags = 0
+flags = pygame.FULLSCREEN
 screen = pygame.display.set_mode(( WINDOW_WIDTH, WINDOW_HEIGHT), flags, 16)
 
 # Initialize "Player" Class
@@ -25,10 +27,23 @@ gravity = 1
 max_velocity_x = 10
 max_velocity_y = 15
 particles = []
-attack_interval = 0
-isRight = True # TEMP Checks player Facing; can be later added to player class
 score = 0
 font = pygame.font.Font('freesansbold.ttf', 25)
+# HS_FILE = "highscore.txt"
+
+# highscore
+# def load_data(self):
+#   self.dir = path.dirname(__file__)
+#   with open(path.join(self.dir,HS_FILE),'w') as f:
+#       try:
+#           self.highcore = int(f.read()) 
+#       expect:
+#           self.highscore = 0 
+
+
+# Background sound
+# pygame.mixer.music.load('Assets/Sounds/')
+# pygame.mixer.music.play(-1)
 
 # Show Score
 def show_score(x, y):
@@ -65,10 +80,9 @@ def main_menu():
         mouse = pygame.mouse.get_pos()
         start_game = create_font('START GAME')
         button_1 = screen.blit(start_game, (560, 350))
-        options = create_font('OPTIONS')
-        button_2 = screen.blit(options, (605, 425))
-        start_game = create_font('QUIT')
-        options = screen.blit(options, (655, 500))
+        quit_game = create_font('QUIT', s=50)
+        button_2 = screen.blit(quit_game, (685, 425))
+
 
         start_game = create_font('GAME TITLE', 100, (255, 255, 255), False, False)
         screen.blit(start_game, (500, 50))
@@ -78,7 +92,8 @@ def main_menu():
                 break # if game_loop is put into a function, call it here.
         if button_2.collidepoint(mouse):
             if click:
-                break
+                pygame.quit()
+                sys.exit()
 
         click = False 
         for event in pygame.event.get():
@@ -137,24 +152,6 @@ while True: # game loop
     player.control(gravity, max_velocity_x, max_velocity_y)
     player.move(solid_tiles)
     player.draw_health(camera_offset, screen)
-
-    # Attack Logic
-    attack = [] # Attack List
-    if attack_interval > 0: # Attack interval timer
-        attack_interval -= 1
-    keys=pygame.key.get_pressed()
-    if keys[pygame.K_SPACE]: # Attack Command
-        if attack_interval == 0:
-            if player.isRight:
-                attack1 = pygame.Rect(player.x + 50, player.y, player.image.get_width(), player.image.get_height())
-                pygame.draw.rect(screen,(255,0,0), (player.x + 50-camera_offset[0], player.y-camera_offset[1], player.image.get_width(), player.image.get_height())) # Insert attack animation here
-                attack.append(attack1)
-            else:
-                attack1 = pygame.Rect(player.x - 50, player.y, player.image.get_width(), player.image.get_height())
-                pygame.draw.rect(screen,(255,0,0), (player.x - 50-camera_offset[0], player.y-camera_offset[1], player.image.get_width(), player.image.get_height())) # Insert attack animation here
-                attack.append(attack1)
-            attack_interval = 15 # Sets max attack delay
-
     # Enemy Controls
     for enemy in enemies:
         enemy.do_movement(player, gravity, max_velocity_y)
@@ -162,8 +159,9 @@ while True: # game loop
         screen.blit(pygame.transform.flip(enemy.image, enemy.flip, False), (enemy.x - camera_offset[0], enemy.y - camera_offset[1]))
         if player.hitbox.colliderect(enemy.hitbox):
             player.hurt(enemy, screen)
-        if len(attack) > 0: # Attack Check
-            if enemy.hitbox.colliderect(attack[0]):
+        if len(player.attack) > 0: # Attack Check
+            if enemy.hitbox.colliderect(player.attack[0]):
+                player.attack = []
                 enemy.damage_check(player, items, enemies)
 
     # Item Controls
@@ -171,6 +169,7 @@ while True: # game loop
         item.functions(screen, camera_offset, player)
 
     # Win / Lose Conditions
+    keys=pygame.key.get_pressed()
     if not player.alive and victory == False:
         text_surface = font.render("Game Over! :( Press 'R' to Play Again.", True, [255,255,255], [0,0,0])
         screen.blit(text_surface, (750, 50))
@@ -206,7 +205,6 @@ while True: # game loop
 
     # Player Blit
     screen.blit(pygame.transform.flip(player.image, player.flip, False), (player.x - camera_offset[0], player.y - camera_offset[1]))
-    
     
     # Particle Controls
     for i in range(len(particles)-1, -1, -1):
