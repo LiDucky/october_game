@@ -1,9 +1,5 @@
 import pygame
 # solid_tiles = [3, 3]
-tile_one = pygame.image.load('Assets/Sprites/Tiles/tile_1.jpg')
-tile_two = pygame.image.load('Assets/Sprites/Tiles/tile_2.jpg')
-tile_three = pygame.image.load('Assets/Sprites/Tiles/tile_3.jpg')
-tile_size = 60
 
 map_one = [
     [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],

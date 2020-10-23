@@ -10,12 +10,13 @@ animation_frames = {}
 
 class Enemy():
     def __init__(self, x=100, y=100): # Initialize Enemy
-        self.image = pygame.image.load('Assets/Sprites/enemy/walk/walk1.png')
+        self.image = pygame.image.load('Assets/Sprites/enemy/walk/walk1.png').convert_alpha()
         self.image.convert()
         self.x = x #pass in window width
         self.y = y #random.randrange(-100, -40)
         self.hitbox = pygame.Rect(self.x, self.y, 50, 60)
-        self.has_jumped = True;
+        self.airtime = 0
+        self.max_airtime = 6
         self.damage = 1
         self.max_velocity_x = 8
         self.velocity_x = 0 # in the future add ai so it'll jump
@@ -83,7 +84,7 @@ class Enemy():
         hit_list = self.collision_test(tiles)
         for tile in hit_list:
             if self.velocity_y > 0:
-                self.has_jumped = False
+                self.airtime = 0
                 self.y = tile.top - int(self.image.get_height()) # collide on bottom side
                 self.velocity_y = 0
             elif self.velocity_y < 0:
@@ -112,9 +113,11 @@ class Enemy():
             self.state = self.change_state(self.state, "walk")
             self.flip = False
         if player.y + player.image.get_height() < self.y + self.image.get_height():
-            if not self.has_jumped:
-                self.has_jumped = True
-                self.velocity_y = -20 # add ground condition, flying enemies are a no-go.
+            if self.airtime < self.max_airtime:
+                self.airtime = self.max_airtime
+                self.velocity_y = -20
+        if self.velocity_y > 0:
+            self.airtime += 1
         self.velocity_y += gravity
         if self.velocity_y > max_velocity_y:
             self.velocity_y = max_velocity_y
@@ -133,7 +136,7 @@ class Enemy():
         for frame in frame_durations:
             animation_frame_id = animation_name + str(n)
             img_loc = path + "/" + animation_frame_id + ".png"
-            animation_image = pygame.image.load(img_loc)
+            animation_image = pygame.image.load(img_loc).convert_alpha()
             animation_frames[animation_frame_id] = animation_image.copy()
             for i in range(frame):
                 animation_frame_data.append(animation_frame_id)

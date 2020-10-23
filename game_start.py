@@ -13,11 +13,11 @@ clock = pygame.time.Clock()
 # Window Size set
 WINDOW_HEIGHT = 1080
 WINDOW_WIDTH = 1920
-flags = 0#pygame.FULLSCREEN
+flags = pygame.FULLSCREEN
 screen = pygame.display.set_mode(( WINDOW_WIDTH, WINDOW_HEIGHT), flags, 16)
 
 # World Settings
-background = pygame.image.load('Assets/Sprites/background.jpg')
+background = pygame.image.load('Assets/Sprites/background.jpg').convert()
 camera_offset = [0, 0]
 gravity = 1
 max_velocity_x = 10
@@ -30,15 +30,18 @@ wave = 1
 message_timer_max = 200
 message_timer = message_timer_max
 level_active = False
-
+tile_one = pygame.image.load('Assets/Sprites/Tiles/tile_1.jpg').convert()
+tile_two = pygame.image.load('Assets/Sprites/Tiles/tile_2.jpg').convert()
+tile_three = pygame.image.load('Assets/Sprites/Tiles/tile_3.jpg').convert()
+tile_size = 60
 
 # Initialize "Player" Class
 player = Player()
 victory = False
 
 # Background sound
-# pygame.mixer.music.load('Assets/Sounds/')
-# pygame.mixer.music.play(-1)
+pygame.mixer.music.load('Assets/Sounds/Myuu-Angst.mp3')
+pygame.mixer.music.play(-1)
 
 # highscore
 def update_score(highscore, score):
@@ -106,19 +109,29 @@ def main_menu():
         font = pygame.font.Font('freesansbold.ttf', s, bold=b, italic=i)
         text = font.render(t, True, c)
         return text
-    
+
     while True:
+
         screen.blit(background, (0,0))
         mouse = pygame.mouse.get_pos()
-        start_game = create_font('PLAY')
-        button_1 = screen.blit(start_game, (560, 350))
-        quit_game = create_font('QUIT', s=50)
-        button_2 = screen.blit(quit_game, (685, 425))
+        start_game_text = create_font('Willo', s=100, b=True, c=(255, 255, 255))
+        text_rect = start_game_text.get_rect(center=(int(WINDOW_WIDTH/2), 100))
+        screen.blit(start_game_text, text_rect)
+        start_game_text = create_font('PLAY', s=40, b=True, c=(255, 255, 255))
+        text_rect = start_game_text.get_rect(center=(int(WINDOW_WIDTH/2), 350))
+        button_1 = screen.blit(start_game_text, text_rect)
+        quit_text = create_font('QUIT', s=40, b=True, c=(255, 255, 255))
+        text_rect = quit_text.get_rect(center=(int(WINDOW_WIDTH/2), 425))
+        button_2 = screen.blit(quit_text, text_rect)
 
-
-        start_game = create_font('Willo', 100, (255, 255, 255), False, False)
-        screen.blit(start_game, (500, 50))
-
+        movement_text = create_font('Arrow Keys = Movement', s=30, b=True, c=(255, 255, 255))
+        text_rect = movement_text.get_rect(center=(int(WINDOW_WIDTH/2), 825))
+        movement = screen.blit(movement_text, text_rect)
+        attack_text = create_font('Spacebar = Attack', s=30, b=True, c=(255, 255, 255))
+        text_rect = movement_text.get_rect(center=(int(WINDOW_WIDTH/2), 875))
+        attack = screen.blit(attack_text, text_rect)
+        pygame.display.update()
+        
         if button_1.collidepoint(mouse):
             if click:
                 break # if game_loop is put into a function, call it here.
@@ -138,7 +151,6 @@ def main_menu():
             if event.type == MOUSEBUTTONDOWN:
                 if event.button == 1:
                     click = True
-        pygame.display.update()
         clock.tick(60)
 
 main_menu()
@@ -149,10 +161,10 @@ while True: # game loop
         camera_offset[0] = 0
     if camera_offset[1] < 0:
         camera_offset[1] = 0
-    if camera_offset[0] > len(maps.map_five[0]) * maps.tile_size - WINDOW_WIDTH:
-        camera_offset[0] = len(maps.map_five[0]) * maps.tile_size - WINDOW_WIDTH
-    if camera_offset[1] > len(maps.map_five) * maps.tile_size - WINDOW_HEIGHT:
-        camera_offset[1] = len(maps.map_five) * maps.tile_size - WINDOW_HEIGHT
+    if camera_offset[0] > len(maps.map_five[0]) * tile_size - WINDOW_WIDTH:
+        camera_offset[0] = len(maps.map_five[0]) * tile_size - WINDOW_WIDTH
+    if camera_offset[1] > len(maps.map_five) * tile_size - WINDOW_HEIGHT:
+        camera_offset[1] = len(maps.map_five) * tile_size - WINDOW_HEIGHT
     
     # Particles
     if pygame.mouse.get_pressed()[0]:
@@ -168,14 +180,14 @@ while True: # game loop
         x = 0
         for tile in row:
             if tile == 1:
-                screen.blit(maps.tile_one, (x * maps.tile_size - camera_offset[0], y * maps.tile_size - camera_offset[1]))
+                screen.blit(tile_one, (x * tile_size - camera_offset[0], y * tile_size - camera_offset[1]))
             if tile == 2:
-                screen.blit(maps.tile_two, (x * maps.tile_size - camera_offset[0], y * maps.tile_size - camera_offset[1]))
-                end_tiles.append(pygame.Rect(x * maps.tile_size, y * maps.tile_size, maps.tile_size, maps.tile_size))
+                screen.blit(tile_two, (x * tile_size - camera_offset[0], y * tile_size - camera_offset[1]))
+                end_tiles.append(pygame.Rect(x * tile_size, y * tile_size, tile_size, tile_size))
             if tile == 3:
-                screen.blit(maps.tile_three, (x * maps.tile_size - camera_offset[0], y * maps.tile_size - camera_offset[1]))
+                screen.blit(tile_three, (x * tile_size - camera_offset[0], y * tile_size - camera_offset[1]))
             if tile != 0 and tile != 2:
-                solid_tiles.append(pygame.Rect(x * maps.tile_size, y * maps.tile_size, maps.tile_size, maps.tile_size))
+                solid_tiles.append(pygame.Rect(x * tile_size, y * tile_size, tile_size, tile_size))
             x += 1
         y += 1
 
