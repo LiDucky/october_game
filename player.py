@@ -1,4 +1,6 @@
 import pygame
+from particle import Particle
+
 #colors:
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
@@ -91,7 +93,7 @@ class Player():
             if player_rect.colliderect(tile):
                 return True
 
-    def control(self, gravity, max_velocity_x, max_velocity_y): # Player Controls
+    def control(self, gravity, max_velocity_x, max_velocity_y, particles): # Player Controls
         self.frame += 1
         if self.frame >= len(self.animation_database[self.state]):
             self.frame = 0
@@ -104,12 +106,16 @@ class Player():
                 else: 
                     velocity_x = -max_velocity_x
                 self.state = self.change_state(self.state, "walk")
+                if self.airtime == 0:
+                    particles.append(Particle(self.x + self.image.get_width()/2, self.y + self.image.get_height(), (96,100,170)))
                 self.flip = True
             elif keys[pygame.K_RIGHT]:
                 if self.velocity_x < max_velocity_x:
                     self.velocity_x += 2
                 else: 
                     velocity_x = max_velocity_x
+                if self.airtime == 0:
+                    particles.append(Particle(self.x + self.image.get_width()/2, self.y + self.image.get_height(), (96,100,170)))
                 self.state = self.change_state(self.state, "walk")
                 self.flip = False
             else:

@@ -35,7 +35,7 @@ class Item():
             if self.isCoin == True: # If item is a Coin, increases coins collected in player model
                 player.coins_collected += 1
             if self.isHealth == True: # if Item is Health, increases health to player model
-                player.health += 1
+                player.health += 2
             self.active = False
 
     def floating(self): # Floating Animation

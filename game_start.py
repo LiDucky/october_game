@@ -4,22 +4,17 @@ from enemy import Enemy
 from items import Item
 from particle import Particle
 from pygame.locals import *
-# from os import path
 pygame.init()
 pygame.mixer.init()
-pygame.display.set_caption('October Game') # change for actual title later
+pygame.display.set_caption('Willo')
 clock = pygame.time.Clock()
-# load_data()
+
 
 # Window Size set
 WINDOW_HEIGHT = 1080
 WINDOW_WIDTH = 1920
-flags = pygame.FULLSCREEN
+flags = 0#pygame.FULLSCREEN
 screen = pygame.display.set_mode(( WINDOW_WIDTH, WINDOW_HEIGHT), flags, 16)
-
-# Initialize "Player" Class
-player = Player()
-victory = False
 
 # World Settings
 camera_offset = [0, 0]
@@ -28,39 +23,76 @@ max_velocity_x = 10
 max_velocity_y = 15
 particles = []
 score = 0
+highscore = 0
 font = pygame.font.Font('freesansbold.ttf', 25)
-# HS_FILE = "highscore.txt"
+wave = 1
+message_timer_max = 200
+message_timer = message_timer_max
+level_active = False
 
-# highscore
-# def load_data(self):
-#   self.dir = path.dirname(__file__)
-#   with open(path.join(self.dir,HS_FILE),'w') as f:
-#       try:
-#           self.highcore = int(f.read()) 
-#       expect:
-#           self.highscore = 0 
 
+# Initialize "Player" Class
+player = Player()
+victory = False
 
 # Background sound
 # pygame.mixer.music.load('Assets/Sounds/')
 # pygame.mixer.music.play(-1)
 
-# Show Score
-def show_score(x, y):
+# highscore
+def update_score(highscore, score):
     score = player.kills * 100 + player.coins_collected * 10
-    screen.blit(font.render("Score: " + str(score), True, (255,255,255)), (x, y))
+    if score > highscore:
+        highscore = score
+    return highscore, score
 
+# Show Score
+def show_score(x, y, highscore, score):
+    screen.blit(font.render("Score: " + str(score), True, (255,255,255)), (x, y))
+    screen.blit(font.render("High Score: " + str(highscore), True, (255,255,255)), (x, y+30)) #highscore display
 # Enemy Spawn
 def spawn_enemy():
-    enemies = []
+    ran_spawn = random.randrange(1,3)
+    if ran_spawn == 1:
+        enemy_list = [Enemy(1955,1230),Enemy(2350,1230),Enemy(1650,1050)]
+    elif ran_spawn == 2:
+        enemy_list = [Enemy(1140,1290),Enemy(1290,750),Enemy(1955,1230),]
+    elif ran_spawn == 3:
+        enemy_list = [Enemy(2350,1230),Enemy(1290,750),Enemy(1650,1050),]
+    enemies = enemy_list
     return enemies
-enemies = spawn_enemy()
+enemies = []
 
-# Item Spawn
+# Item SpawnF
 def spawn_item():
-    items = []
+    items = [
+        Item(930,870, "coin"),
+        Item(1650,1050, "health"),
+        Item(2220,1230, "coin"),
+        Item(1555,510, "coin"),
+        Item(815, 330, "health"),
+        Item(495, 270, "coin"),
+        Item(120, 930, "coin"),
+    ]
     return items
 items = spawn_item()
+
+# Level Reset
+def level_reset(player, victory, wave, level_active, enemies, items, message_timer, message_timer_max):
+    player.coins_collected = 0
+    player.kills = 0
+    victory = False
+    player.health = player.max_health
+    player.alive = True
+    player.x = 300
+    player.y = 1000
+    wave = 1
+    level_active = False
+    message_timer = message_timer_max
+    enemies = []
+    items = spawn_item()
+    return victory, wave, level_active, enemies, items, message_timer
+
 
 # FPS counter
 def show_fps():
@@ -76,13 +108,13 @@ def main_menu():
     while True:
         screen.fill((0, 0, 0))
         mouse = pygame.mouse.get_pos()
-        start_game = create_font('START GAME')
+        start_game = create_font('PLAY')
         button_1 = screen.blit(start_game, (560, 350))
         quit_game = create_font('QUIT', s=50)
         button_2 = screen.blit(quit_game, (685, 425))
 
 
-        start_game = create_font('GAME TITLE', 100, (255, 255, 255), False, False)
+        start_game = create_font('Willo', 100, (255, 255, 255), False, False)
         screen.blit(start_game, (500, 50))
 
         if button_1.collidepoint(mouse):
@@ -122,7 +154,7 @@ while True: # game loop
     
     # Particles
     if pygame.mouse.get_pressed()[0]:
-        particles.append(Particle(pygame.mouse.get_pos()[0] + camera_offset[0], pygame.mouse.get_pos()[1] + camera_offset[1]))
+        particles.append(Particle(pygame.mouse.get_pos()[0] + camera_offset[0], pygame.mouse.get_pos()[1] + camera_offset[1], (255, 255, 255)))
 
     # Generate Tiles
     solid_tiles = []
@@ -147,19 +179,19 @@ while True: # game loop
 
     # Character Controls
     player.last_hit += 1
-    player.control(gravity, max_velocity_x, max_velocity_y)
+    player.control(gravity, max_velocity_x, max_velocity_y, particles)
     player.move(solid_tiles)
     player.draw_health(camera_offset, screen)
     # Enemy Controls
     for enemy in enemies:
         enemy.do_movement(player, gravity, max_velocity_y)
-        enemy.move(solid_tiles)
+        enemy.move(solid_tiles, enemies)
         screen.blit(pygame.transform.flip(enemy.image, enemy.flip, False), (enemy.x - camera_offset[0], enemy.y - camera_offset[1]))
         if player.hitbox.colliderect(enemy.hitbox):
             player.hurt(enemy, screen)
         if len(player.attack) > 0: # Attack Check
             if enemy.hitbox.colliderect(player.attack[0]):
-                enemy.damage_check(player, items, enemies)
+                enemy.damage_check(player, items, enemies, particles)
 
     # Item Controls
     for item in items:
@@ -167,40 +199,44 @@ while True: # game loop
 
     # Win / Lose Conditions
     keys=pygame.key.get_pressed()
+    if keys[pygame.K_ESCAPE]:
+        main_menu()
     if not player.alive and victory == False:
         text_surface = font.render("Game Over! :( Press 'R' to Play Again.", True, [255,255,255], [0,0,0])
         screen.blit(text_surface, (750, 50))
         if keys[pygame.K_r]: # Player repsawn
-            player.coins_collected = 0
-            player.kills = 0
-            victory = False
-            player.health = player.max_health
-            player.alive = True
-            player.x = 300
-            player.y = 1000
-            enemies = spawn_enemy()
-            items = spawn_item()
+            victory, wave, level_active, enemies, items, message_timer = level_reset(player, victory, wave, level_active, enemies, items, message_timer, message_timer_max)
     if player.check_win(end_tiles):
-        if len(enemies) > 0:
+        if victory:
+            text_surface = font.render("You win! Press 'R' to Play Again.", True, [255,255,255], [0,0,0])
+            screen.blit(text_surface, (800, 50))
+            player.kill()
+            if keys[pygame.K_r]: # Player repsawn
+               victory, wave, level_active, enemies, items, message_timer = level_reset(player, victory, wave, level_active, enemies, items, message_timer, message_timer_max)
+        else:
             text_surface = font.render("Defeat All Enemies!", True, [255,255,255], [0,0,0])
             screen.blit(text_surface, (850, 50))
-        else:
-            victory = True
-            player.kill()
-    if victory:
-        text_surface = font.render("You win! Press 'R' to Play Again.", True, [255,255,255], [0,0,0])
-        screen.blit(text_surface, (800, 50))
-        if keys[pygame.K_r]: # Player repsawn
-            player.coins_collected = 0
-            player.kills = 0
-            victory = False
-            player.health = player.max_health
-            player.alive = True
-            player.x = 300
-            player.y = 1000
-            enemies = spawn_enemy()
-            items = spawn_item()
 
+    # Enemy Waves
+    if wave <= 5:
+        if level_active == False:
+            if message_timer > 0:
+                text_surface = font.render(f"Wave {wave}", True, [255,255,255], [0,0,0])
+                screen.blit(text_surface, (925, 100))
+                message_timer -= 1
+            elif message_timer == 0:
+                enemies = spawn_enemy()
+                level_active = True 
+        elif level_active and len(enemies) == 0:
+            wave += 1 
+            level_active = False
+            message_timer = message_timer_max
+    else:
+        victory = True
+        if message_timer > 0:
+            text_surface = font.render("Proceed To Exit", True, [255,255,255], [0,0,0])
+            screen.blit(text_surface, (875, 100))
+            message_timer -= 1
 
     # Player Blit
     screen.blit(pygame.transform.flip(player.image, player.flip, False), (player.x - camera_offset[0], player.y - camera_offset[1]))
@@ -221,7 +257,8 @@ while True: # game loop
             sys.exit()
 
     player.attack = []
-    show_score(500, 100)
+    highscore, score = update_score(highscore, score)
+    show_score(500, 100, highscore, score)
     show_fps()
     pygame.display.update()
     clock.tick(60) # run at 60fps

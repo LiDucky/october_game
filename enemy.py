@@ -1,6 +1,7 @@
 import pygame
 import random
 from items import Item
+from particle import Particle
 
 # define colors
 GREEN = (0, 255, 0)
@@ -46,7 +47,9 @@ class Enemy():
             player.kills += 1
             all_enemies.remove(self)
     
-    def damage_check(self, player, all_items, all_enemies): # Check health for drop
+    def damage_check(self, player, all_items, all_enemies, particles): # Check health for drop
+        for i in range(10):
+            particles.append(Particle(self.x + self.image.get_width()/2, self.y + self.image.get_height()/2, (255, 255, 255)))
         if (self.health - player.damage) <= 0:
             self.drop_stuff(all_items)
         self.hurt(player, all_enemies)
@@ -60,24 +63,28 @@ class Enemy():
             self.speedy = random.randrange(1, 8)
 
 
-    def collision_test(self, tiles): # World Collide
+    def collision_test(self, tiles, enemies): # World Collide
         hit_list = []
-        player_rect = self.image.get_rect(left=self.x, top=self.y)
+        self_rect = self.image.get_rect(left=self.x, top=self.y)
+        for enemy in enemies:
+            if self != enemy:
+                if self_rect.colliderect(enemy.hitbox):
+                    hit_list.append(enemy.hitbox)
         for tile in tiles:
-            if player_rect.colliderect(tile):
+            if self_rect.colliderect(tile):
                 hit_list.append(tile)
         return hit_list
 
-    def move(self, tiles): # World Collide
+    def move(self, tiles, enemies): # World Collide
         self.x += self.velocity_x
-        hit_list = self.collision_test(tiles)
+        hit_list = self.collision_test(tiles, enemies)
         for tile in hit_list:
             if self.velocity_x > 0:
                 self.x = tile.left - int(self.image.get_width()) # collide on right side
             elif self.velocity_x < 0:
                 self.x = tile.right # collide on left side
         self.y += self.velocity_y
-        hit_list = self.collision_test(tiles)
+        hit_list = self.collision_test(tiles, [])
         for tile in hit_list:
             if self.velocity_y > 0:
                 self.has_jumped = False
